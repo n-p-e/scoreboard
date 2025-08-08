@@ -1,4 +1,5 @@
-import { Search } from "@kobalte/core/search"
+import { Combobox, useListCollection } from "@ark-ui/solid/combobox"
+import { useFilter } from "@ark-ui/solid/locale"
 import { useRouter } from "@tanstack/solid-router"
 import { IoAddSharp, IoTriangleSharp } from "solid-icons/io"
 import {
@@ -288,53 +289,74 @@ const PlayerNameInput = (props: {
   const [searchTerm, setSearchTerm] = createSignal("")
   const [search] = createResource(() => playerNamesQuery())
 
-  // Filter for search
-  const options = () => {
-    if (!searchTerm()) return []
-    return [
-      { display: `New Player '${searchTerm()}'`, value: searchTerm() },
-      ...(search()
-        ?.map((o) => ({ display: o.name, value: o.name }))
-        .filter(
-          (o) => o.value.toLowerCase().indexOf(searchTerm().toLowerCase()) >= 0
-        ) ?? []),
-    ]
-  }
+  const filterFn = useFilter({ sensitivity: "base" })
+  const { collection, filter, set } = useListCollection(() => ({
+    initialItems: search() ?? [],
+    limit: 100,
+    itemToString: (item) => item.name,
+    itemToValue: (item) => item.name,
+    filter: filterFn().contains,
+  }))
+
+  const [open, setOpen] = createSignal(false)
+  createEffect(() => set(search() ?? []))
 
   return (
-    <Search
-      triggerMode="input"
+    <Combobox.Root
       // debounceOptionsMillisecond={300}
-      options={options()}
-      optionValue={(op) => op.value}
-      optionLabel={(op) => op.value}
-      optionTextValue={(op) => op.display}
-      onInputChange={(term) => setSearchTerm(term)}
-      onChange={(op) => props.onNameChange?.(op?.value ?? "")}
-      itemComponent={(props) => (
-        <Search.Item
-          item={props.item}
-          class="p-2 hover:bg-gray-200 hover:text-black"
-        >
-          <Search.ItemLabel>{props.item.textValue}</Search.ItemLabel>
-        </Search.Item>
-      )}
+      collection={collection()}
+      open={open()}
+      onOpenChange={(e) => setOpen(e.open)}
+      allowCustomValue
+      openOnChange
+      closeOnSelect
+      inputBehavior="autohighlight"
+      // optionValue={(op) => op.value}
+      // optionLabel={(op) => op.value}
+      // optionTextValue={(op) => op.display}
+      inputValue={searchTerm()}
+      onInputValueChange={(e) => {
+        filter(e.inputValue)
+        setSearchTerm(e.inputValue)
+        props.onNameChange?.(e.inputValue)
+      }}
     >
-      <Search.Control>
-        <Search.Input
+      <Combobox.Control>
+        <Combobox.Input
           name={props.name}
           class="text-lg border-1 px-2 border-gray-700 w-full placeholder-gray-600"
           placeholder="Player"
           autocomplete="off"
         />
-      </Search.Control>
-      <Search.Portal>
-        <Search.Content class="bg-gray-800 p-4">
-          <Search.Listbox class="flex flex-col overflow-y-auto cursor-default" />
-          <Search.NoResult class="p-2">Search for a player...</Search.NoResult>
-        </Search.Content>
-      </Search.Portal>
-    </Search>
+      </Combobox.Control>
+      <Combobox.Positioner>
+        <Combobox.Content class="bg-gray-800 p-4 z-20">
+          <Combobox.ItemGroup class="flex flex-col overflow-y-auto cursor-default">
+            <Combobox.ItemGroupLabel
+              class="p-2 hover:bg-gray-200 hover:text-black"
+              onClick={() => {
+                if (searchTerm().length > 0) setOpen(false)
+              }}
+            >
+              {searchTerm()
+                ? `Create player "${searchTerm()}"`
+                : "Search for a player..."}
+            </Combobox.ItemGroupLabel>
+
+            <For each={collection().items}>
+              {(item) => (
+                <Combobox.Item
+                  item={item}
+                  class="p-2 hover:bg-gray-200 hover:text-black"
+                >
+                  <Combobox.ItemText>{item.name}</Combobox.ItemText>
+                </Combobox.Item>
+              )}
+            </For>
+          </Combobox.ItemGroup>
+        </Combobox.Content>
+      </Combobox.Positioner>
+    </Combobox.Root>
   )
 }
 
