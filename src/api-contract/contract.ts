@@ -60,7 +60,7 @@ const leaguesContract = c.router({
 const riichiContract = c.router({
   listMatches: {
     method: "GET",
-    path: "/league/:league/match",
+    path: "/leagues/:league/match",
     query: z.object({
       matchId: z.optional(z.string()),
       limit: z.optional(z.coerce.number()),
@@ -74,7 +74,7 @@ const riichiContract = c.router({
 
   updateMatch: {
     method: "PUT",
-    path: "/league/:league/match/:match",
+    path: "/leagues/:league/match/:match",
     body: z.object({
       data: StandingsItemZ,
     }),
@@ -135,7 +135,7 @@ const riichiContract = c.router({
 
   patchStandings: {
     method: "PATCH",
-    path: "/league/:leagueId/match/:matchId",
+    path: "/leagues/:leagueId/match/:matchId",
     body: z.object({
       confirmed: z.boolean(),
     }),
@@ -146,7 +146,7 @@ const riichiContract = c.router({
 
   deleteStandings: {
     method: "DELETE",
-    path: "/league/:leagueId/match/:matchId",
+    path: "/leagues/:leagueId/match/:matchId",
     responses: {
       200: z.object({ status: z.literal("success") }),
     },
