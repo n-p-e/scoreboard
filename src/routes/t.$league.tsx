@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/solid-router"
 import { Suspense } from "solid-js"
-import { Navbar, NavbarLink } from "~/components/navbar"
+import { NavbarContainer, NavbarLink } from "~/components/navbar"
 
 export const Route = createFileRoute("/t/$league")({
   component: Layout,
@@ -11,7 +11,7 @@ function Layout() {
 
   return (
     <div class="flex flex-col min-h-screen">
-      <Navbar>
+      <NavbarContainer>
         <NavbarLink
           to={`/t/$league/matches`}
           params={{ league: params().league }}
@@ -30,7 +30,7 @@ function Layout() {
         >
           Submit
         </NavbarLink>
-      </Navbar>
+      </NavbarContainer>
 
       <Suspense
         fallback={

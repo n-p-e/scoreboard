@@ -7,7 +7,7 @@ import { Link } from "~/components/Link"
 import { getLoginState } from "~/users/login-state"
 import style from "./navbar.module.css"
 
-export const Navbar = (props: ParentProps) => {
+export const NavbarContainer = (props: ParentProps) => {
   return (
     <nav class="flex flex-row items-center justify-center h-10 xs:h-12 bg-slate-900 text-sm xs:text-base text-gray-200">
       <div class="flex-1"> </div>
