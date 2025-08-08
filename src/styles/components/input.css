@@ -1,0 +1,13 @@
+@layer components {
+  .ui-input {
+    @apply text-lg border-1 px-2 border-gray-700 placeholder-gray-600;
+  }
+
+  .ui-input:focus {
+    @apply outline-blue-300 outline-1;
+  }
+
+  .ui-input:disabled {
+    @apply text-gray-300 border-gray-800 bg-gray-900 cursor-not-allowed;
+  }
+}

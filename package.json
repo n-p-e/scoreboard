@@ -1,29 +1,47 @@
 {
-  "name": "tanstack-solid-start-example-basic",
+  "name": "scoreboard-app",
   "private": true,
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build && tsc --noEmit",
-    "start": "vite start"
+    "dev": "bun x --bun vite dev",
+    "build": "bun x --bun vite build && tsc --noEmit",
+    "start": "bun run .output/server/index.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/fira-code": "^5.2.6",
+    "@fontsource-variable/newsreader": "^5.2.8",
+    "@kobalte/core": "^0.13.11",
     "@tanstack/solid-router": "^1.130.12",
     "@tanstack/solid-router-devtools": "^1.130.13",
-    "@tanstack/solid-start": "^1.130.15",
-    "solid-js": "^1.9.5",
-    "redaxios": "^0.5.1",
-    "tailwind-merge": "^2.6.0"
+    "@tanstack/solid-start": "^1.130.16",
+    "@ts-rest/core": "3.53.0-rc.1",
+    "@ts-rest/serverless": "3.53.0-rc.1",
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.44.4",
+    "jose": "^6.0.12",
+    "pg": "^8.16.3",
+    "pino": "^9.8.0",
+    "pino-pretty": "^13.1.1",
+    "solid-icons": "^1.1.0",
+    "solid-js": "^1.9.8",
+    "uuid25": "^0.1.5",
+    "uuidv7": "^1.0.2",
+    "vite-env-only": "^3.0.3",
+    "zod": "^4.0.15"
   },
   "devDependencies": {
-    "@types/node": "^22.5.4",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.1",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/bun": "^1.2.19",
+    "@types/node": "^22.17.0",
+    "autoprefixer": "^10.4.21",
+    "biome": "^0.3.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2",
     "vite": "^6.3.5",
-    "vite-plugin-solid": "^2.11.7",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-plugin-solid": "^2.11.8",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   }
 }

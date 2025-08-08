@@ -1,22 +1,45 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "./fonts.css";
+@import "./components/button.css";
+@import "./components/input.css";
 
-@layer base {
-  html {
-    color-scheme: light dark;
-  }
+/* Where to look for js files */
+@source "../";
 
-  * {
-    @apply border-gray-200 dark:border-gray-800;
-  }
+@theme {
+  --breakpoint-xs: 30rem;
+  --breakpoint-2xl: 100rem;
+  --breakpoint-3xl: 120rem;
 
-  html,
-  body {
-    @apply text-gray-900 bg-gray-50 dark:bg-gray-950 dark:text-gray-200;
-  }
+  --font-serif:
+    "Newsreader Variable", "Newsreader", "Iowan Old Style", "Palatino Linotype",
+    "URW Palladio L", P052, serif;
+  --font-mono: "Fira Code Variable", "Fira Code", monospace;
+}
 
-  .using-mouse * {
-    outline: none !important;
-  }
+/* :root {
+    --background-rgb: 214, 219, 220;
+    --foreground-rgb: 0, 0, 0;
+  } */
+
+:root {
+  --background-rgb: 0, 0, 0;
+  --foreground-rgb: 255, 255, 255;
+}
+
+/* @media (prefers-color-scheme: dark) {
+    :root {
+      --background-rgb: 0, 0, 0;
+      --foreground-rgb: 255, 255, 255;
+    }
+  } */
+
+body {
+  background: rgb(var(--background-rgb));
+  color: rgb(var(--foreground-rgb));
+  font-family: var(--font-serif);
+}
+
+* {
+  touch-action: manipulation;
 }

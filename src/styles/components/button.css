@@ -1,0 +1,17 @@
+@layer components {
+  .ui-button {
+    @apply h-9 px-4 py-2 bg-gray-200 text-black inline-flex items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 hover:bg-white active:bg-white;
+  }
+
+  .ui-button-outline {
+    @apply bg-inherit text-white border-2 border-gray-600 hover:border-gray-500 hover:bg-white/10 active:bg-white/20;
+  }
+
+  .ui-buttom-confirm {
+    @apply bg-green-400 hover:bg-green-300 active:bg-green-400;
+  }
+
+  .ui-button-destructive {
+    @apply text-white bg-red-800 hover:bg-red-700 active:bg-red-800;
+  }
+}

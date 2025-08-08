@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/solid-router'
+import { Link } from "@tanstack/solid-router"
 
 export function NotFound({ children }: { children?: any }) {
   return (
@@ -8,6 +8,7 @@ export function NotFound({ children }: { children?: any }) {
       </div>
       <p class="flex items-center gap-2 flex-wrap">
         <button
+          type="button"
           onClick={() => window.history.back()}
           class="bg-emerald-500 text-white px-2 py-1 rounded uppercase font-black text-sm"
         >
