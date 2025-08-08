@@ -58,7 +58,12 @@ function Leaderboard() {
                   {(item.standing / 10).toFixed(1)}
                 </td>
                 <td class="text-center border-x border-gray-700">
-                  {(item.averagePoints * 100).toLocaleString("en-AU", {})}
+                  {Math.round(item.averagePoints * 100).toLocaleString(
+                    "en-AU",
+                    {
+                      maximumFractionDigits: 0,
+                    }
+                  )}
                 </td>
                 <td class="text-center border-x border-gray-700">
                   {(item.averageRank + 1).toFixed(2)}
