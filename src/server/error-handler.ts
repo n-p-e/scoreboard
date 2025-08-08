@@ -3,7 +3,7 @@ import {
   type TsRestRequest,
   TsRestResponse,
 } from "@ts-rest/serverless/fetch"
-import { ZodError } from "zod"
+import { $ZodError as ZodErrorBase } from "zod/v4/core"
 import { AppError } from "~/error/app-error"
 import { HttpStatusError } from "~/error/http-error"
 import { getLogger } from "~/logger"
@@ -41,7 +41,7 @@ export const tsRestErrorHandler = (err: unknown, req: TsRestRequest) => {
       },
       { status: err.statusCode }
     )
-  } else if (err instanceof ZodError) {
+  } else if (err instanceof ZodErrorBase) {
     return TsRestResponse.fromJson(
       {
         tag: "invalid-request",
