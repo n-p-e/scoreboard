@@ -15,6 +15,9 @@ export const Route = createRootRoute({
         name: "viewport",
         content: "width=device-width, initial-scale=1",
       },
+      {
+        title: "Scoreboard",
+      },
       // ...seo({
       //   title:
       //     "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
