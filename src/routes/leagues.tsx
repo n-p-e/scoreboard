@@ -4,9 +4,10 @@ import { appApiClient } from "~/api-contract/client"
 import { Link } from "~/components/Link"
 
 export const Route = createFileRoute("/leagues")({
-  loader: async () => {
-    console.log("test server fetch")
-    const resp = await appApiClient.leagues.listLeagues()
+  loader: async (ctx) => {
+    const resp = await appApiClient.leagues.listLeagues({fetchOptions: {
+      signal: ctx.abortController.signal,
+    }})
     if (resp.status === 200) {
       return { leagues: resp.body.leagues }
     }
