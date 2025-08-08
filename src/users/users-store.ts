@@ -6,6 +6,7 @@ import { and, eq, type InferSelectModel, isNull } from "drizzle-orm"
 import * as jose from "jose"
 import { db, type Transaction } from "~/db/connection"
 import { rolesTable, usersTable } from "~/db/schema"
+import { serverEnv } from "~/env.server"
 import { HttpStatusError } from "~/error/http-error"
 import {
   type AuthStatusResult,
@@ -19,10 +20,7 @@ import {
 export const AuthTokenName = "auth_token"
 
 const secret = new Uint8Array(
-  Buffer.from(
-    "OV1uPA3ow1c25wN_1yNje8DwsyMGAIj2JWxLQtP1OEbSZoZbBJq502LYNF6cIXs3gcdKTamwS0_soEhEadNP_A==",
-    "base64url"
-  ).buffer
+  Buffer.from(serverEnv.tokenSignSecret, "base64url").buffer
 )
 const alg = "HS256"
 
