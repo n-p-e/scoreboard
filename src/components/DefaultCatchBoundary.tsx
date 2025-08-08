@@ -6,6 +6,7 @@ import {
   useMatch,
   useRouter,
 } from "@tanstack/solid-router"
+import { Button } from "~/components/button"
 
 export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
   const router = useRouter()
@@ -20,32 +21,27 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
     <div class="min-w-0 flex-1 p-4 flex flex-col items-center justify-center gap-6">
       <ErrorComponent error={error} />
       <div class="flex gap-2 items-center flex-wrap">
-        <button
+        <Button
           type="button"
           onClick={() => {
             router.invalidate()
           }}
-          class={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
         >
           Try Again
-        </button>
+        </Button>
         {isRoot() ? (
-          <Link
-            to="/"
-            class={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
-          >
-            Home
+          <Link to="/">
+            <Button variant="outline">Home</Button>
           </Link>
         ) : (
           <Link
             to="/"
-            class={`px-2 py-1 bg-gray-600 dark:bg-gray-700 rounded text-white uppercase font-extrabold`}
             onClick={(e) => {
               e.preventDefault()
               window.history.back()
             }}
           >
-            Go Back
+            <Button variant="outline">Go Back</Button>
           </Link>
         )}
       </div>
