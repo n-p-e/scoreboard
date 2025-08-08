@@ -4,7 +4,7 @@ import { RiSystemMenuLine } from "solid-icons/ri"
 import { ParentProps, Show } from "solid-js"
 import { appApiClient } from "~/api-contract/client"
 import { Link } from "~/components/Link"
-import { getLoginState } from "~/users/login-state"
+import { queryLoginState } from "~/users/login-state"
 import style from "./navbar.module.css"
 
 export const NavbarContainer = (props: ParentProps) => {
@@ -33,7 +33,7 @@ export const NavbarLink: typeof Link = (props) => {
 
 export const Dropdown = () => {
   const navigate = useNavigate()
-  const [loginState] = getLoginState()
+  const [loginState] = queryLoginState()
 
   return (
     <Popover.Root modal>

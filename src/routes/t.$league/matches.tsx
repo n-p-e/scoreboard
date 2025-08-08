@@ -7,7 +7,7 @@ import { Button } from "~/components/button.js"
 import { Link } from "~/components/Link.js"
 import { findLeague } from "~/league/league-store"
 import { listMatches } from "~/riichi/riichi-store"
-import { getLoginState } from "~/users/login-state.js"
+import { queryLoginState } from "~/users/login-state.js"
 
 const loader = createServerFn()
   .validator((data: { leagueId: string }) => data)
@@ -37,7 +37,7 @@ function MatchesPage() {
 
 function MatchesPageContent() {
   const data = Route.useLoaderData()
-  const [loginState] = getLoginState()
+  const [loginState] = queryLoginState()
 
   return (
     <main class="max-w-md w-full mx-auto pt-2">

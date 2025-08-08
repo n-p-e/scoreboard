@@ -1,4 +1,4 @@
-import '~/server/server-only'
+import "~/server/server-only"
 
 import { and, eq, type InferSelectModel, isNull } from "drizzle-orm"
 import { db } from "~/db/connection"

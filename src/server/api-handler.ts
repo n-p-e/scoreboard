@@ -1,12 +1,11 @@
 import { fetchRequestHandler, tsr } from "@ts-rest/serverless/fetch"
-import { CookieMap } from "bun"
 import { appApiContract } from "~/api-contract/contract"
 import { leaguesRouter } from "~/league/leagues-handler"
 import { riichiRouter } from "~/riichi/riichi-handler"
 import { tsRestErrorHandler } from "~/server/error-handler"
 import { AppPlatformContext, RequestExt } from "~/server/server-types"
 import { usersRouter } from "~/users/users-handler"
-import { AuthTokenName, queryLoggedInStatus } from "~/users/users-store"
+import { getRequestAuthStatus } from "~/users/users-store"
 
 const router = tsr
   .platformContext<AppPlatformContext>()
@@ -36,19 +35,8 @@ export const createApiHandler = () => {
         errorHandler: tsRestErrorHandler,
         requestMiddleware: [
           tsr.middleware<RequestExt>(async (request, ctx) => {
-            const authorizationHeader = request.headers.get("Authorization")
-            let token: string | undefined
-            const authTokenCookie = new CookieMap(
-              request.headers.get("Cookie") ?? undefined
-            ).get(AuthTokenName)
-            if (authTokenCookie != null) {
-              token = authTokenCookie
-            }
-            if (authorizationHeader?.startsWith("Bearer ")) {
-              token = authorizationHeader.substring("Bearer ".length)
-            }
             request.authStatus = (ctx as AppPlatformContext).authStatus =
-              await queryLoggedInStatus(token)
+              await getRequestAuthStatus(request)
           }),
         ],
       },

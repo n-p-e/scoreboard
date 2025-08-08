@@ -1,4 +1,4 @@
-import '~/server/server-only'
+import "~/server/server-only"
 
 import {
   and,

@@ -40,17 +40,37 @@ export async function userLogin(params: UserLogin) {
   return { token, user, roles }
 }
 
+export async function getRequestAuthStatus(
+  request: Request
+): Promise<AuthStatusResult> {
+  const authorizationHeader = request.headers.get("Authorization")
+  let token: string | undefined
+  const authTokenCookie = new CookieMap(
+    request.headers.get("Cookie") ?? undefined
+  ).get(AuthTokenName)
+  if (authTokenCookie != null) {
+    token = authTokenCookie
+  }
+  if (authorizationHeader?.startsWith("Bearer ")) {
+    token = authorizationHeader.substring("Bearer ".length)
+  }
+
+  return parseAuthToken(token)
+}
+
 export async function parseAuthTokenCookie(cookie: string | null | undefined) {
   if (cookie == null) return { ok: false }
 
   const cookieMap = new CookieMap(cookie)
-  return await parseAuthToken(cookieMap.get(AuthTokenName))
+  return await parseAuthTokenInner(cookieMap.get(AuthTokenName))
 }
 
 /**
  * Parse the auth token from HTTP Cookie header
  */
-export async function parseAuthToken(token: string | null | undefined): Promise<
+export async function parseAuthTokenInner(
+  token: string | null | undefined
+): Promise<
   | { ok: false }
   | {
       ok: true
@@ -73,10 +93,10 @@ export async function parseAuthToken(token: string | null | undefined): Promise<
   }
 }
 
-export async function queryLoggedInStatus(
+export async function parseAuthToken(
   token: string | null | undefined
 ): Promise<AuthStatusResult> {
-  const parseResult = await parseAuthToken(token)
+  const parseResult = await parseAuthTokenInner(token)
   if (parseResult.ok) {
     return {
       loggedIn: true,
