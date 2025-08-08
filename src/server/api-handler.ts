@@ -1,6 +1,7 @@
 import { fetchRequestHandler, tsr } from "@ts-rest/serverless/fetch"
 import { CookieMap } from "bun"
 import { appApiContract } from "~/api-contract/contract"
+import { leaguesRouter } from "~/league/leagues-handler"
 import { riichiRouter } from "~/riichi/riichi-handler"
 import { tsRestErrorHandler } from "~/server/error-handler"
 import { AppPlatformContext, RequestExt } from "~/server/server-types"
@@ -11,6 +12,7 @@ const router = tsr
   .platformContext<AppPlatformContext>()
   .router(appApiContract, {
     users: usersRouter,
+    leagues: leaguesRouter,
     riichi: riichiRouter,
 
     healthcheck: async () => {

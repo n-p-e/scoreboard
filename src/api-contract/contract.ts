@@ -1,5 +1,6 @@
 import { initContract } from "@ts-rest/core"
 import * as z from "zod/mini"
+import { LeagueDataZ } from "~/league/league-schema"
 import {
   LeaderboardResultZ,
   StandingsItemZ,
@@ -39,6 +40,18 @@ const usersContract = c.router({
     responses: {
       200: z.object({
         data: AuthStatusResultZ,
+      }),
+    },
+  },
+})
+
+const leaguesContract = c.router({
+  listLeagues: {
+    method: "GET",
+    path: "/leagues",
+    responses: {
+      200: z.object({
+        leagues: z.array(LeagueDataZ),
       }),
     },
   },
@@ -143,6 +156,7 @@ const riichiContract = c.router({
 export const appApiContract = c.router(
   {
     users: usersContract,
+    leagues: leaguesContract,
     riichi: riichiContract,
 
     healthcheck: {
