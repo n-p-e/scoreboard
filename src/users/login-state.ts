@@ -11,15 +11,16 @@ const loginState = createServerFn().handler(async () => {
   return await getRequestAuthStatus(request)
 })
 
-export const queryLoginState = () => {
-  return createResource(async (): Promise<AuthStatusResult> => {
-    // TODO: handle server side state
-    if (isServer) return await loginState()
+export const fetchLoginState = async (): Promise<AuthStatusResult> => {
+  if (isServer) return await loginState()
 
-    const res = await appApiClient.users.queryLoginStatus()
-    if (res.status === 200) {
-      return res.body.data
-    }
-    return { loggedIn: false }
-  })
+  const res = await appApiClient.users.queryLoginStatus()
+  if (res.status === 200) {
+    return res.body.data
+  }
+  return { loggedIn: false }
+}
+
+export const queryLoginState = () => {
+  return createResource(fetchLoginState)
 }

@@ -1,9 +1,16 @@
-import { createFileRoute } from "@tanstack/solid-router"
+import { createFileRoute, redirect } from "@tanstack/solid-router"
 import { For } from "solid-js"
 import { appApiClient } from "~/api-contract/client"
 import { Link } from "~/components/Link"
+import { fetchLoginState } from "~/users/login-state"
 
 export const Route = createFileRoute("/leagues")({
+  beforeLoad: async () => {
+    if (!(await fetchLoginState()).loggedIn) {
+      throw redirect({ to: "/login" })
+    }
+  },
+
   loader: async (ctx) => {
     const resp = await appApiClient.leagues.listLeagues({
       fetchOptions: {
