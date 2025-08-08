@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "bun x --bun vite dev",
     "build": "bun x --bun vite build && tsc --noEmit",
+    "format": "biome check --write --unsafe",
+    "check": "biome check && tsc --noEmit",
     "start": "bun run .output/server/index.mjs"
   },
   "dependencies": {
