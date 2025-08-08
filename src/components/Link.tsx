@@ -2,8 +2,8 @@ import { createLink, LinkComponent } from "@tanstack/solid-router"
 import * as Solid from "solid-js"
 
 type BasicLinkProps = Solid.JSX.IntrinsicElements["a"] & {
-  // Add any additional props you want to pass to the anchor element
   activeClass?: string
+  inactiveClass?: string
 }
 
 const BasicLinkComponent: Solid.Component<BasicLinkProps> = (props) => {
@@ -18,6 +18,9 @@ export const Link: LinkComponent<typeof BasicLinkComponent> = (props) => {
       preload={"intent"}
       activeProps={{
         class: props.activeClass,
+      }}
+      inactiveProps={{
+        class: props.inactiveClass,
       }}
       {...props}
     />
