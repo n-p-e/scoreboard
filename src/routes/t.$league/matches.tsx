@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { format } from "date-fns"
 import { For, Match, Show, Suspense, Switch } from "solid-js"
+import * as z from "zod/mini"
 import { appApiClient } from "~/api-contract/client.js"
 import { Button } from "~/components/button.js"
 import { Link } from "~/components/Link.js"
@@ -10,7 +11,7 @@ import { listMatches } from "~/riichi/riichi-store"
 import { queryLoginState } from "~/users/login-state.js"
 
 const loader = createServerFn()
-  .validator((data: { leagueId: string }) => data)
+  .validator(z.object({ leagueId: z.string() }))
   .handler(async ({ data }) => {
     const leagueId = data.leagueId
     const league = await findLeague(leagueId)

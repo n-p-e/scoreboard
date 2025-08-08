@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { Show } from "solid-js"
+import * as z from "zod/mini"
 import { findLeague } from "~/league/league-store"
 import { RiichiResultSubmission } from "~/riichi/submit"
 import { LeagueDescription } from "~/riichi/submit-page-notes"
 
 const loader = createServerFn()
-  .validator((data: { leagueId: string }) => data)
+  .validator(z.object({ leagueId: z.string() }))
   .handler(async ({ data }) => {
     return { league: await findLeague(data.leagueId) }
   })

@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { For } from "solid-js"
+import * as z from "zod/mini"
 import { queryLeaderboard } from "~/riichi/riichi-store"
 
 const loader = createServerFn()
-  .validator((data: { leagueId: string }) => data)
+  .validator(z.object({ leagueId: z.string() }))
   .handler(async ({ data }) => {
     const res = await queryLeaderboard({
       leagueId: data.leagueId,
