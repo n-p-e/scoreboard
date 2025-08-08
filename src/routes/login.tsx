@@ -36,7 +36,11 @@ function LoginPage() {
               setLoading(false)
               if (res.status === 200) {
                 const search = new URLSearchParams(window.location.search)
-                navigate({ to: search.get("redir") ?? "/leagues" })
+                navigate({
+                  to: search.get("redir") ?? "/leagues",
+                  replace: true,
+                  resetScroll: true,
+                })
               } else {
                 setError("Could not log in")
               }
