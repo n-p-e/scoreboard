@@ -33,6 +33,7 @@
 
 .dropdownItem {
   display: flex;
+  width: 100%;
   font-size: var(--text-base);
   line-height: var(--text-base--line-height);
   color: var(--color-gray-200);

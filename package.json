@@ -9,6 +9,7 @@
     "start": "bun run .output/server/index.mjs"
   },
   "dependencies": {
+    "@ark-ui/solid": "^5.18.3",
     "@fontsource-variable/fira-code": "^5.2.6",
     "@fontsource-variable/newsreader": "^5.2.8",
     "@kobalte/core": "^0.13.11",
