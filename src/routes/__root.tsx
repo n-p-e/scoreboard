@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/solid-router"
 import type * as Solid from "solid-js"
-import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary"
+import { DefaultCatchBoundary } from "~/components/errors"
 import { Loading } from "~/components/loading"
 import { NotFound } from "~/components/NotFound"
 import appCss from "~/styles/app.css?url"

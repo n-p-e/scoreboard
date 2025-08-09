@@ -1,4 +1,5 @@
 // src/server.ts
+// This is the entry point for the SSR build
 import {
   createStartHandler,
   defaultStreamHandler,

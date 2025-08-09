@@ -1,5 +1,5 @@
 import { createRouter as createTanStackRouter } from "@tanstack/solid-router"
-import { DefaultCatchBoundary } from "./components/DefaultCatchBoundary"
+import { DefaultCatchBoundary } from "./components/errors"
 import { NotFound } from "./components/NotFound"
 import { routeTree } from "./routeTree.gen"
 
