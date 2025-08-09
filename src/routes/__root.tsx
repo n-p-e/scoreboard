@@ -2,6 +2,7 @@
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/solid-router"
 import type * as Solid from "solid-js"
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary"
+import { Loading } from "~/components/loading"
 import { NotFound } from "~/components/NotFound"
 import appCss from "~/styles/app.css?url"
 
@@ -48,6 +49,7 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.ico" },
     ],
   }),
+  pendingComponent: Loading,
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: () => <NotFound />,
   shellComponent: RootDocument,

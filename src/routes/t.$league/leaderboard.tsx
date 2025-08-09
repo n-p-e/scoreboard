@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
-import { For } from "solid-js"
+import { For, Suspense } from "solid-js"
 import * as z from "zod/mini"
+import { Loading } from "~/components/loading"
 import { queryLeaderboard } from "~/riichi/riichi-store"
 
 const loader = createServerFn()
@@ -16,6 +17,8 @@ const loader = createServerFn()
 
 export const Route = createFileRoute("/t/$league/leaderboard")({
   loader: async (ctx) => {
+    // if (!isServer) await new Promise((r) => setTimeout(r, 1000))
+
     return await loader({ data: { leagueId: ctx.params.league } })
   },
   head: async () => ({
@@ -25,8 +28,16 @@ export const Route = createFileRoute("/t/$league/leaderboard")({
       },
     ],
   }),
-  component: Leaderboard,
+  component: LeaderboardPage,
 })
+
+function LeaderboardPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Leaderboard />
+    </Suspense>
+  )
+}
 
 function Leaderboard() {
   const data = Route.useLoaderData()

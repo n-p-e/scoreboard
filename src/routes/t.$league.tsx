@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/solid-router"
 import { Suspense } from "solid-js"
+import { Loading } from "~/components/loading"
 import { NavbarContainer, NavbarLink } from "~/components/navbar"
 
 export const Route = createFileRoute("/t/$league")({
@@ -32,13 +33,7 @@ function Layout() {
         </NavbarLink>
       </NavbarContainer>
 
-      <Suspense
-        fallback={
-          <div class="flex flex-1 items-center justify-center w-full h-full text-lg font-semibold">
-            Loading
-          </div>
-        }
-      >
+      <Suspense fallback={<Loading />}>
         <Outlet />
       </Suspense>
     </div>

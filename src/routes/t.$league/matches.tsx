@@ -6,6 +6,7 @@ import * as z from "zod/mini"
 import { appApiClient } from "~/api-contract/client.js"
 import { Button } from "~/components/button.js"
 import { Link } from "~/components/Link.js"
+import { Loading } from "~/components/loading"
 import { findLeague } from "~/league/league-store"
 import { listMatches } from "~/riichi/riichi-store"
 import { queryLoginState } from "~/users/login-state.js"
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/t/$league/matches")({
 
 function MatchesPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<Loading />}>
       <MatchesPageContent />
     </Suspense>
   )
