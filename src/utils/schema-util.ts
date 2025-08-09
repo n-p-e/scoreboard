@@ -3,8 +3,8 @@ import * as z from "zod/mini"
 
 export const integerRange = (min: number, max: number) => {
   return z.coerce.number().check(
-    z.minimum(min),
-    z.maximum(max),
+    z.minimum(min, `should be between ${min} and ${max}`),
+    z.maximum(max, `should be between ${min} and ${max}`),
     z.refine((n) => Number.isSafeInteger(n), "Invalid input: expected integer")
   )
 }

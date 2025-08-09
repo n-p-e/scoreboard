@@ -98,9 +98,9 @@ const riichiContract = c.router({
             z.object({
               id: z.string(),
               name: z.string(),
-              lastActive: z.date(),
-              createdAt: z.date(),
-              updatedAt: z.date(),
+              lastActive: z.coerce.date(),
+              createdAt: z.coerce.date(),
+              updatedAt: z.coerce.date(),
             })
           ),
         }),

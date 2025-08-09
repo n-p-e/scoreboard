@@ -1,6 +1,6 @@
 import { Combobox, useListCollection } from "@ark-ui/solid/combobox"
 import { useFilter } from "@ark-ui/solid/locale"
-import { useRouter } from "@tanstack/solid-router"
+import { useNavigate } from "@tanstack/solid-router"
 import { IoAddSharp, IoTriangleSharp } from "solid-icons/io"
 import {
   type ComponentProps,
@@ -26,7 +26,7 @@ const playerNums = [0, 1, 2, 3]
 const defaultTotalScore = 100_000
 
 export const RiichiResultSubmission = (props: { league: LeagueData }) => {
-  const router = useRouter()
+  const navigate = useNavigate()
   const [results, setResults] = createSignal<(number | null)[]>(
     playerNums.map(() => null)
   )
@@ -83,11 +83,13 @@ export const RiichiResultSubmission = (props: { league: LeagueData }) => {
       const res = await appApiClient.riichi.submitStandings({
         body: { data },
       })
+      console.log("navigate1 ")
       if (res.status !== 200) {
         throw Error("An error has occured") // TODO: proper messages
       }
-      router.navigate({
-        to: "/t/$league/submit",
+      console.log("navigate")
+      await navigate({
+        to: "/t/$league/matches",
         params: {
           league: props.league.leagueId,
         },
@@ -290,16 +292,21 @@ const PlayerNameInput = (props: {
   const [search] = createResource(() => playerNamesQuery())
 
   const filterFn = useFilter({ sensitivity: "base" })
-  const { collection, filter, set } = useListCollection(() => ({
+  const {
+    collection,
+    filter,
+    set: setCandidates,
+  } = useListCollection({
     initialItems: search() ?? [],
     limit: 100,
     itemToString: (item) => item.name,
     itemToValue: (item) => item.name,
+    // filter: (itemText, filterText) => itemText.includes(filterText),
     filter: filterFn().contains,
-  }))
+  })
 
   const [open, setOpen] = createSignal(false)
-  createEffect(() => set(search() ?? []))
+  createEffect(() => setCandidates(search() ?? []))
 
   return (
     <Combobox.Root
