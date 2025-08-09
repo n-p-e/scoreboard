@@ -1,4 +1,9 @@
-import { createFileRoute, notFound } from "@tanstack/solid-router"
+import {
+  createFileRoute,
+  notFound,
+  useNavigate,
+  useRouter,
+} from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { format } from "date-fns"
 import { For, Match, Show, Suspense, Switch } from "solid-js"
@@ -14,6 +19,7 @@ import { queryLoginState } from "~/users/login-state.js"
 const loader = createServerFn()
   .validator(z.object({ leagueId: z.string() }))
   .handler(async ({ data }) => {
+    // await new Promise((resolve) => setTimeout(resolve, 500))
     const leagueId = data.leagueId
     const league = await findLeague(leagueId)
     if (league == null) throw notFound()
@@ -27,6 +33,8 @@ export const Route = createFileRoute("/t/$league/matches")({
   }),
   loader: async (ctx) => loader({ data: { leagueId: ctx.params.league } }),
   component: MatchesPage,
+  pendingComponent: Loading,
+  preload: false,
 })
 
 function MatchesPage() {
@@ -39,6 +47,8 @@ function MatchesPage() {
 
 function MatchesPageContent() {
   const data = Route.useLoaderData()
+  const router = useRouter()
+  const navigate = useNavigate()
   const [loginState] = queryLoginState()
 
   return (
@@ -113,7 +123,8 @@ function MatchesPageContent() {
                           },
                         })
                         if (resp.status === 200) {
-                          window.location.reload()
+                          router.invalidate({})
+                          await navigate({ to: ".", replace: true })
                         }
                       }}
                     >
@@ -133,7 +144,8 @@ function MatchesPageContent() {
                           },
                         })
                         if (resp.status === 200) {
-                          window.location.reload()
+                          router.invalidate({})
+                          await navigate({ to: ".", replace: true })
                         }
                       }}
                     >

@@ -17,10 +17,9 @@ const loader = createServerFn()
 
 export const Route = createFileRoute("/t/$league/leaderboard")({
   loader: async (ctx) => {
-    // if (!isServer) await new Promise((r) => setTimeout(r, 1000))
-
     return await loader({ data: { leagueId: ctx.params.league } })
   },
+  pendingComponent: Loading,
   head: async () => ({
     meta: [
       {
