@@ -14,6 +14,7 @@ import {
 } from "drizzle-orm"
 import { db, Transaction } from "~/db/connection"
 import { playersTable, standingsItemsView, standingsTable } from "~/db/schema"
+import { permissionDenied } from "~/error/errors"
 import { HttpStatusError } from "~/error/http-error"
 import { findLeague } from "~/league/league-store"
 import { getLogger } from "~/logger"
@@ -213,10 +214,7 @@ export async function patchStanding(params: {
   auth: AuthStatusResult
 }) {
   if (!params.auth.loggedIn || !params.auth.roles.includes("admin")) {
-    throw new HttpStatusError(
-      400,
-      "You do not have permission for this operation"
-    )
+    permissionDenied()
   }
 
   const updateRes = await db
@@ -245,10 +243,7 @@ export async function deleteStanding(params: {
   user: AuthStatusResult
 }) {
   if (!params.user.loggedIn || !params.user.roles.includes("admin")) {
-    throw new HttpStatusError(
-      400,
-      "You do not have permission for this operation"
-    )
+    permissionDenied()
   }
 
   const updateRes = await db

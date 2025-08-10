@@ -11,7 +11,7 @@ export class AppError extends Error {
     if (typeof data === "object") {
       this.info = data
     } else {
-      this.info = { tag: data }
+      this.info = { tag: "error_uncatagorised" }
     }
 
     if (this.info.tag == null) {
