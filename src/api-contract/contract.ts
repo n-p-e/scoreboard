@@ -169,5 +169,12 @@ export const appApiContract = c.router(
   },
   {
     pathPrefix: "/api",
+    commonResponses: {
+      400: z.object({
+        tag: z.string(),
+        message: z.string(),
+        info: z.object({}),
+      }),
+    },
   }
 )
