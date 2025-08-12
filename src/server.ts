@@ -11,7 +11,7 @@ const apiHandler = createApiHandler()
 
 export default createStartHandler({
   createRouter,
-})(async (ctx) => {
+})(async (ctx): Promise<Response> => {
   if (new URL(ctx.request.url).pathname.startsWith("/api/")) {
     return apiHandler({ request: ctx.request })
   }

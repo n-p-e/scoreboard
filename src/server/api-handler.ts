@@ -25,7 +25,7 @@ const router = tsr
   })
 
 export const createApiHandler = () => {
-  return async (c: { request: Request }) => {
+  return async (c: { request: Request }): Promise<Response> => {
     return await fetchRequestHandler({
       request: c.request,
       // request: new Request(c.req.url, c.req.raw),
