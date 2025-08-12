@@ -18,5 +18,6 @@ export default defineConfig({
   ],
   build: {
     target: "es2022",
+    minify: !import.meta.env.BUILD_DISABLE_MINIFY,
   },
 })
