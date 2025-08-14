@@ -120,17 +120,20 @@ export async function updateMatch(
   params: StandingsItem
 ): Promise<StandingsItem> {
   return await db.transaction(async (tx) => {
-    const updated = await tx.update(standingsTable).set({
-      data: {
-        standings: params.standings
-          .slice()
-          .sort((a, b) => b.finalScore - a.finalScore)
-          .map((item, index) => ({
-            ...item,
-            rank: index,
-          })),
-      },
-    })
+    const updated = await tx
+      .update(standingsTable)
+      .set({
+        data: {
+          standings: params.standings
+            .slice()
+            .sort((a, b) => b.finalScore - a.finalScore)
+            .map((item, index) => ({
+              ...item,
+              rank: index,
+            })),
+        },
+      })
+      .where(eq(standingsTable.id, parseInt(params.matchId, 10)))
 
     if ((updated.rowCount ?? 0) <= 0) {
       throw new HttpStatusError(400, "Unable to update match")

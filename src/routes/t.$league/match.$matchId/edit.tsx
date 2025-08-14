@@ -94,12 +94,15 @@ function EditMatchForm() {
                       class="w-full"
                       value={item().points ?? 0}
                       onInput={(e) => {
-                        setFormData(
-                          "standings",
-                          index,
-                          "points",
-                          parseInt(e.target.value, 10)
-                        )
+                        let value: number | null = parseInt(e.target.value, 10)
+                        if (
+                          Number.isNaN(value) ||
+                          e.currentTarget.value.length === 0
+                        ) {
+                          value = null
+                        }
+
+                        setFormData("standings", index, "points", value)
                       }}
                     />
 
