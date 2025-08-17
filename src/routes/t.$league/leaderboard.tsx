@@ -61,7 +61,7 @@ function Leaderboard() {
                 <td class="text-center border-x border-gray-700">
                   <span class="px-2">{index() + 1}</span>
                 </td>
-                <td class="text-center border-x border-gray-700">
+                <td class="text-center border-x border-gray-700 w-[16ch] overflow-hidden overflow-ellipsis">
                   <span class="font-semibold">{item.playerName}</span>
                 </td>
                 <td class="text-center border-x border-gray-700">
