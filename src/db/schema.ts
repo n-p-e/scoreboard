@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm"
 import {
   type AnyPgColumn,
   bigint,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -94,15 +95,24 @@ export const rolesTable = pgTable(
   (table) => [primaryKey({ columns: [table.user_id, table.role] })]
 )
 
-export const playersTable = pgTable("players", {
-  id: bigint({ mode: "number" })
-    .primaryKey()
-    .generatedAlwaysAsIdentity({ startWith: 10000 }),
-  name: varchar().notNull().unique(),
-  name_lower: varchar().notNull().unique(),
-  last_active: timestamp(),
-  user_id: uuid().references(() => usersTable.id, {
-    onDelete: "cascade",
-  }),
-  ...createdUpdatedAtCols(),
-})
+export const playersTable = pgTable(
+  "players",
+  {
+    id: bigint({ mode: "number" })
+      .primaryKey()
+      .generatedAlwaysAsIdentity({ startWith: 10000 }),
+    name: varchar().notNull().unique(),
+    name_lower: varchar().notNull().unique(),
+    last_active: timestamp(),
+    user_id: uuid().references(() => usersTable.id, {
+      onDelete: "cascade",
+    }),
+    ...createdUpdatedAtCols(),
+  },
+  (table) => [
+    index("players_name_lower_search_idx").using(
+      "gist",
+      table.name_lower.op("gist_trgm_ops")
+    ),
+  ]
+)
