@@ -1,5 +1,4 @@
 import { Combobox, useListCollection } from "@ark-ui/solid/combobox"
-import { useFilter } from "@ark-ui/solid/locale"
 import { useNavigate } from "@tanstack/solid-router"
 import { IoAddSharp, IoTriangleSharp } from "solid-icons/io"
 import {
@@ -19,6 +18,7 @@ import { Button } from "~/components/button"
 import type { LeagueData } from "~/league/league-schema"
 import { calculateMatchStandings } from "~/riichi/scores"
 import { createAsyncAction } from "~/ui-utils/action"
+import { createDebouncedGetter } from "~/ui-utils/debounce"
 import { arraySet, sum } from "~/utils/arrays"
 import type { PlayerRawScore, SubmitMatchResultRequest } from "./riichi-schema"
 
@@ -83,11 +83,11 @@ export const RiichiResultSubmission = (props: { league: LeagueData }) => {
       const res = await appApiClient.riichi.submitStandings({
         body: { data },
       })
-      console.log("navigate1 ")
+
       if (res.status !== 200) {
         throw Error("An error has occured") // TODO: proper messages
       }
-      console.log("navigate")
+
       await navigate({
         to: "/t/$league/matches",
         params: {
@@ -275,8 +275,13 @@ const FormRow = (props: {
   )
 }
 
-const playerNamesQuery = async () => {
-  const res = await appApiClient.riichi.listPlayers()
+const playerNamesQuery = async (searchTerm: string) => {
+  const res = await appApiClient.riichi.listPlayers({
+    query: {
+      search: searchTerm,
+      limit: 5,
+    },
+  })
   if (res.status === 200) {
     return res.body.data.players
   }
@@ -289,20 +294,18 @@ const PlayerNameInput = (props: {
 }) => {
   // Thing in the text box
   const [searchTerm, setSearchTerm] = createSignal("")
-  const [search] = createResource(() => playerNamesQuery())
+  const debouncedSearchTerm = createDebouncedGetter(searchTerm)
+  const [search] = createResource(debouncedSearchTerm, (value) =>
+    playerNamesQuery(value)
+  )
 
-  const filterFn = useFilter({ sensitivity: "base" })
-  const {
-    collection,
-    filter,
-    set: setCandidates,
-  } = useListCollection({
+  const { collection, set: setCandidates } = useListCollection({
     initialItems: search() ?? [],
     limit: 100,
     itemToString: (item) => item.name,
     itemToValue: (item) => item.name,
     // filter: (itemText, filterText) => itemText.includes(filterText),
-    filter: filterFn().contains,
+    // filter: filterFn().contains,
   })
 
   const [open, setOpen] = createSignal(false)
@@ -323,7 +326,6 @@ const PlayerNameInput = (props: {
       // optionTextValue={(op) => op.display}
       inputValue={searchTerm()}
       onInputValueChange={(e) => {
-        filter(e.inputValue)
         setSearchTerm(e.inputValue)
         props.onNameChange?.(e.inputValue)
       }}
