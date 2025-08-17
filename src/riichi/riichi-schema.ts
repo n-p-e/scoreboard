@@ -37,9 +37,10 @@ export const StandingsItemZ = z.object({
 })
 export type StandingsItem = z.infer<typeof StandingsItemZ>
 
-export type PlayerData = {
+export interface PlayerData {
   id: string
   name: string
+  nameLower: string
   lastActive: Date
   createdAt: Date
   updatedAt: Date

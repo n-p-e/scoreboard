@@ -63,7 +63,7 @@ const riichiContract = c.router({
     path: "/leagues/:league/match",
     query: z.object({
       matchId: z.optional(z.string()),
-      limit: z.optional(z.coerce.number()),
+      limit: z.optional(integerRange(1, 1000)),
     }),
     responses: {
       200: z.object({
@@ -89,6 +89,7 @@ const riichiContract = c.router({
     method: "GET",
     path: "/players",
     query: z.object({
+      search: z.optional(z.string()),
       limit: z.optional(integerRange(0, 100)),
     }),
     responses: {

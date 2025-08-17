@@ -39,12 +39,15 @@ export const riichiRouter = tsr
       }
     },
 
-    listPlayers: async () => {
+    listPlayers: async ({ query }) => {
       return {
         status: 200,
         body: {
           data: {
-            players: await listPlayers({}),
+            players: await listPlayers({
+              nameSearch: query.search,
+              limit: query.limit,
+            }),
           },
         },
       }

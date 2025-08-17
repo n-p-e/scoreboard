@@ -7,6 +7,8 @@ import {
   count,
   desc,
   eq,
+  getTableColumns,
+  gt,
   type InferSelectModel,
   isNull,
   sql,
@@ -151,17 +153,57 @@ export async function updateMatch(
   })
 }
 
-export async function listPlayers(params: { name?: string; limit?: number }) {
+export async function listPlayers(params: {
+  name?: string
+  nameSearch?: string
+  limit?: number
+}) {
+  let { name, nameSearch, limit } = params
+
+  nameSearch = nameSearch?.trim().toLowerCase()
+  if (nameSearch != null && nameSearch.length > 0) {
+    return await searchPlayers({ nameSearch, limit: limit ?? 10 })
+  }
+
   const res = await db
     .select()
     .from(playersTable)
     .where(
-      and(params.name != null ? eq(playersTable.name, params.name) : undefined)
+      and(
+        isNull(playersTable.deleted_at),
+        name != null ? eq(playersTable.name, name) : undefined
+      )
     )
     .orderBy(desc(playersTable.last_active))
-    .limit(params.limit ?? 50)
+    .limit(limit ?? 50)
 
   return res.map(toPlayerItem)
+}
+
+async function searchPlayers(params: { nameSearch: string; limit: number }) {
+  const { nameSearch, limit } = params
+
+  const searchThrehold = 0.1
+  const similaritySql = () =>
+    sql`similarity(${playersTable.name_lower}, ${nameSearch})`
+
+  const res = await db
+    .select({
+      ...getTableColumns(playersTable),
+      sim: similaritySql(),
+    })
+    .from(playersTable)
+    .where(
+      and(isNull(playersTable.deleted_at), gt(similaritySql(), searchThrehold))
+    )
+    .orderBy(
+      desc(similaritySql()),
+      desc(playersTable.last_active),
+      asc(playersTable.name_lower)
+    )
+    .limit(limit)
+
+  return res.map((item) => ({ ...toPlayerItem(item), searchScore: item.sim }))
 }
 
 export async function queryLeaderboard(params: {
@@ -280,12 +322,13 @@ function toStandingsItem(
   }
 }
 
-function toPlayerItem(obj: InferSelectModel<typeof playersTable>): PlayerData {
+function toPlayerItem(obj: InferSelectModel<typeof playersTable>) {
   return {
     id: String(obj.id),
     name: obj.name,
+    nameLower: obj.name_lower,
     lastActive: obj.last_active ?? obj.created_at,
     createdAt: obj.created_at,
     updatedAt: obj.updated_at,
-  }
+  } satisfies PlayerData
 }
