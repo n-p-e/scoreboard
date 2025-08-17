@@ -123,6 +123,7 @@ export async function updateMatch(
     const updated = await tx
       .update(standingsTable)
       .set({
+        created_at: params.createdAt,
         data: {
           standings: params.standings
             .slice()
