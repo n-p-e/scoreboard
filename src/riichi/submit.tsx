@@ -23,7 +23,8 @@ import { arraySet, sum } from "~/utils/arrays"
 import type { PlayerRawScore, SubmitMatchResultRequest } from "./riichi-schema"
 
 const playerNums = [0, 1, 2, 3]
-const defaultTotalScore = 100_000
+const defaultTotalScore = 120_000
+const playerInitialScore = 300
 
 export const RiichiResultSubmission = (props: { league: LeagueData }) => {
   const navigate = useNavigate()
@@ -243,7 +244,7 @@ const FormRow = (props: {
               props.onPointsChange?.(input)
             }
           }}
-          placeholder="250"
+          placeholder={String(playerInitialScore)}
           inputMode="decimal"
           autocomplete="off"
         />
