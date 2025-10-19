@@ -23,8 +23,8 @@ import { arraySet, sum } from "~/utils/arrays"
 import type { PlayerRawScore, SubmitMatchResultRequest } from "./riichi-schema"
 
 const playerNums = [0, 1, 2, 3]
-const defaultTotalScore = 120_000
-const playerInitialScore = 300
+const defaultTotalScore = 100_000
+const playerInitialScore = 250
 
 export const RiichiResultSubmission = (props: { league: LeagueData }) => {
   const navigate = useNavigate()

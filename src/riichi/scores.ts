@@ -1,7 +1,7 @@
 import type { FinalScore, PlayerRawScore } from "~/riichi/riichi-schema"
 
-export const defaultUma = [150, 50, -50, -150]
-export const defaultInitialPoints = 300
+export const defaultUma = [300, 100, -100, -300]
+export const defaultInitialPoints = 250
 
 export function calculateMatchStandings(
   scores: PlayerRawScore[],
