@@ -116,7 +116,7 @@ const riichiContract = c.router({
       leagueId: z.string(),
     }),
     query: z.object({
-      limit: z.optional(integerRange(0, 100)),
+      limit: z.optional(integerRange(0, 200)),
     }),
     responses: {
       200: z.object({

@@ -10,7 +10,7 @@ const loader = createServerFn()
   .handler(async ({ data }) => {
     const res = await queryLeaderboard({
       leagueId: data.leagueId,
-      limit: 50,
+      limit: 200,
     })
     return res
   })
