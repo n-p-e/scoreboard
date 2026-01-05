@@ -18,7 +18,7 @@ import { db, Transaction } from "~/db/connection"
 import { playersTable, standingsItemsView, standingsTable } from "~/db/schema"
 import { permissionDenied } from "~/error/errors"
 import { HttpStatusError } from "~/error/http-error"
-import { findLeague } from "~/league/league-store"
+import { canUpdateLeague, findLeague } from "~/league/league-store"
 import { getLogger } from "~/logger"
 import type {
   FinalScore,
@@ -34,6 +34,14 @@ const logger = getLogger("riichi-store")
 
 export async function submitRiichi(params: MatchResultSubmission) {
   logger.info({ params }, "submitRiichi")
+
+  const league = await findLeague(params.leagueId)
+  if (league == null || !canUpdateLeague(league)) {
+    throw new HttpStatusError(400, "invalid league to submit scores", {
+      leagueId: league?.leagueId,
+      leagueStatus: league?.status,
+    })
+  }
 
   const standings = calculateMatchStandings(params.matchResult)
     .sort((a, b) => a.rank - b.rank)

@@ -26,6 +26,10 @@ export async function listLeagues(params: { limit?: number }) {
   return res.map(toLeagueModel)
 }
 
+export function canUpdateLeague(league: LeagueData) {
+  return league.status !== "disabled"
+}
+
 function toLeagueModel(obj: InferSelectModel<typeof leaguesTable>): LeagueData {
   return {
     leagueId: obj.league_id,
