@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
-import { Show } from "solid-js"
+import { Match, Show, Switch } from "solid-js"
 import * as z from "zod/mini"
 import { Loading } from "~/components/loading"
 import { findLeague } from "~/league/league-store"
@@ -31,16 +31,35 @@ export const Route = createFileRoute("/t/$league/submit")({
 
 function SubmitPage() {
   const data = Route.useLoaderData()
+  const league = () => data().league
+  const isLeagueDisabled = () => league()?.status === "disabled"
 
   return (
     <main class="max-w-md w-full mx-auto my-2 px-4">
       <h2 class="py-2 text-lg font-semibold">Submit Match Result</h2>
 
       <Show when={data().league != null} fallback={<p>League not found</p>}>
-        <p class="">{data().league?.displayName}</p>
+        <div class="flex w-full justify-between">
+          <p class="">{data().league?.displayName}</p>
+          <Show when={isLeagueDisabled()}>
+            <div class="text-amber-400 select-none font-sans text-sm rounded-full border px-2 text-center">
+              FINISHED
+            </div>
+          </Show>
+        </div>
         <LeagueDescription />
         <div class="my-4">
-          <RiichiResultSubmission league={data().league!} />
+          <Switch>
+            <Match when={!isLeagueDisabled()}>
+              <RiichiResultSubmission league={data().league!} />
+            </Match>
+            <Match when={true}>
+              <p>
+                League was locked by the admin. You can still view the
+                leaderboard.
+              </p>
+            </Match>
+          </Switch>
         </div>
       </Show>
     </main>

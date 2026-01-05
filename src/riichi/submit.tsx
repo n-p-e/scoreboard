@@ -28,6 +28,8 @@ const playerInitialScore = 250
 
 export const RiichiResultSubmission = (props: { league: LeagueData }) => {
   const navigate = useNavigate()
+
+  const isLeagueDisabled = () => props.league.status === "disabled"
   const [results, setResults] = createSignal<(number | null)[]>(
     playerNums.map(() => null)
   )
@@ -105,6 +107,7 @@ export const RiichiResultSubmission = (props: { league: LeagueData }) => {
 
   return (
     <form
+      aria-disabled={isLeagueDisabled()}
       ref={formRef}
       class="flex flex-col items-center w-full max-w-sm mx-auto gap-4"
       onSubmit={(ev) => {
@@ -185,7 +188,7 @@ export const RiichiResultSubmission = (props: { league: LeagueData }) => {
             {totalScore().toLocaleString("en-AU")}
           </span>
         </div>
-        <SubmitButton disabled={submitAction.loading} />
+        <SubmitButton disabled={isLeagueDisabled() || submitAction.loading} />
         <div class="shrink basis-4" />
       </div>
     </form>
