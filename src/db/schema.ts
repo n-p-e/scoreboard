@@ -38,6 +38,7 @@ export const leaguesTable = pgTable("leagues", {
     .generatedAlwaysAsIdentity({ startWith: 10000 }),
   league_id: varchar().notNull().unique(),
   display_name: varchar().notNull().unique(),
+  status: varchar(),
   ...createdUpdatedAtCols(),
 })
 

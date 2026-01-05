@@ -14,7 +14,7 @@ export async function findLeague(leagueId: string) {
     )
 
   if (res.length === 0) return null
-  return toLeagueObj(res[0])
+  return toLeagueModel(res[0])
 }
 
 export async function listLeagues(params: { limit?: number }) {
@@ -23,14 +23,15 @@ export async function listLeagues(params: { limit?: number }) {
     .from(leaguesTable)
     .where(isNull(leaguesTable.deleted_at))
     .limit(params.limit ?? 50)
-  return res.map(toLeagueObj)
+  return res.map(toLeagueModel)
 }
 
-function toLeagueObj(obj: InferSelectModel<typeof leaguesTable>): LeagueData {
+function toLeagueModel(obj: InferSelectModel<typeof leaguesTable>): LeagueData {
   return {
     leagueId: obj.league_id,
     displayName: obj.display_name,
     createdAt: obj.created_at,
     updatedAt: obj.updated_at,
+    status: obj.status,
   }
 }
