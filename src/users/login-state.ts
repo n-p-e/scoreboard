@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/solid-start"
-import { getWebRequest } from "@tanstack/solid-start/server"
+import { getRequest } from "@tanstack/solid-start/server"
 import { createResource } from "solid-js"
 import { isServer } from "solid-js/web"
 import { appApiClient } from "~/api-contract/client"
@@ -7,7 +7,7 @@ import type { AuthStatusResult } from "~/users/users-schema"
 import { getRequestAuthStatus } from "~/users/users-store"
 
 const loginState = createServerFn().handler(async () => {
-  const request = getWebRequest()
+  const request = getRequest()
   return await getRequestAuthStatus(request)
 })
 

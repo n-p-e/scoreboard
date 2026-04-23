@@ -3,7 +3,7 @@ import { DefaultCatchBoundary } from "./components/errors"
 import { NotFound } from "./components/NotFound"
 import { routeTree } from "./routeTree.gen"
 
-export function createRouter() {
+export function getRouter() {
   const router = createTanStackRouter({
     routeTree,
     // defaultPreload: false,
@@ -18,6 +18,6 @@ export function createRouter() {
 
 declare module "@tanstack/solid-router" {
   interface Register {
-    router: ReturnType<typeof createRouter>
+    router: ReturnType<typeof getRouter>
   }
 }

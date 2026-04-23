@@ -1,6 +1,6 @@
 import "~/server/server-only"
 
-import { getWebRequest } from "@tanstack/solid-start/server"
+import { getRequest } from "@tanstack/solid-start/server"
 import { initClient, tsRestFetchApi } from "@ts-rest/core"
 import { appApiContract } from "~/api-contract/contract"
 
@@ -13,7 +13,7 @@ export const serverApiClient = initClient(appApiContract, {
   validateResponse: true,
   api: async (req) => {
     // copy headers from server request context to preserve auth status
-    const originalHeaders = getWebRequest().headers
+    const originalHeaders = getRequest().headers
     // console.log({ originalHeaders })
     const headers = { ...req.headers }
     if (originalHeaders?.get("authorization")) {
