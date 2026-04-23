@@ -6,7 +6,7 @@ import { Loading } from "~/components/loading"
 import { queryLeaderboard } from "~/riichi/riichi-store"
 
 const loader = createServerFn()
-  .validator(z.object({ leagueId: z.string() }))
+  .inputValidator(z.object({ leagueId: z.string() }))
   .handler(async ({ data }) => {
     const res = await queryLeaderboard({
       leagueId: data.leagueId,
