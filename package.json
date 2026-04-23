@@ -8,7 +8,7 @@
     "build": "bun x --bun vite build && tsc --noEmit",
     "format": "biome check --write --unsafe",
     "check": "biome check && tsc --noEmit",
-    "start": "bun run .output/server/index.mjs"
+    "start": "bun run dist/server/server.js"
   },
   "dependencies": {
     "@ark-ui/solid": "^5.36.2",
