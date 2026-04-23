@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/solid-router"
-import type * as Solid from "solid-js"
+import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/solid-router"
+import * as Solid from "solid-js"
+import { HydrationScript } from "solid-js/web"
 import { DefaultCatchBoundary } from "~/components/errors"
 import { Loading } from "~/components/loading"
 import { NotFound } from "~/components/NotFound"
@@ -52,16 +53,28 @@ export const Route = createRootRoute({
   pendingComponent: Loading,
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: () => <NotFound />,
-  shellComponent: RootDocument,
+  component: RootComponent,
 })
 
-function RootDocument({ children }: { children: Solid.JSX.Element }) {
+function RootComponent() {
   return (
-    <>
-      <HeadContent />
-      {children}
-      {/* <TanStackRouterDevtools position="bottom-right" /> */}
-      <Scripts />
-    </>
+    <RootDocument>
+      <Outlet />
+    </RootDocument>
+  )
+}
+
+function RootDocument({ children }: Readonly<{ children: Solid.JSX.Element }>) {
+  return (
+    <html lang="en">
+      <head>
+        <HydrationScript />
+      </head>
+      <body>
+        <HeadContent />
+        <Solid.Suspense>{children}</Solid.Suspense>
+        <Scripts />
+      </body>
+    </html>
   )
 }

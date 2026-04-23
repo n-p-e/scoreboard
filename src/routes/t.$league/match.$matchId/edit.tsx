@@ -146,7 +146,7 @@ function EditMatchForm() {
   )
 }
 
-export default function EditMatchPage() {
+function EditMatchPage() {
   return (
     <Suspense fallback={<div>Loading</div>}>
       <EditMatchForm />

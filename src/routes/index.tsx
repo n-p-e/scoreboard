@@ -5,7 +5,8 @@ import { Link } from "~/components/Link"
 export const Route = createFileRoute("/")({
   component: Home,
 })
-export default function Home() {
+
+function Home() {
   return (
     <main class="text-center mx-auto text-white p-4">
       <h1 class="max-6-xs text-6xl uppercase">Riichi</h1>

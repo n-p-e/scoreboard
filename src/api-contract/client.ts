@@ -7,8 +7,8 @@ let appApiClient = initClient(appApiContract, {
   credentials: "include",
 })
 
-if (import.meta.env.SSR) {
-  appApiClient = (await import("./client-ssr")).serverApiClient
-}
+// if (import.meta.env.SSR) {
+//   appApiClient = (await import("./client-ssr")).serverApiClient
+// }
 
 export { appApiClient }

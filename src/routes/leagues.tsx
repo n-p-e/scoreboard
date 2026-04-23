@@ -26,7 +26,7 @@ export const Route = createFileRoute("/leagues")({
   component: LeaguesPage,
 })
 
-export default function LeaguesPage() {
+function LeaguesPage() {
   const data = Route.useLoaderData()
 
   return (
