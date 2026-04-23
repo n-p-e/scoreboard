@@ -1,5 +1,6 @@
-import { tsr } from "@ts-rest/serverless/fetch"
-import { appApiContract } from "~/api-contract/contract"
+import { zValidator } from "@hono/zod-validator"
+import { Hono } from "hono"
+import * as z from "zod/mini"
 import {
   deleteStanding,
   listMatches,
@@ -9,87 +10,124 @@ import {
   submitRiichi,
   updateMatch,
 } from "~/riichi/riichi-store"
-import { AppPlatformContext } from "~/server/server-types"
+import { HonoEnv } from "~/server/server-types"
+import { integerRange } from "~/utils/schema-util"
+import { StandingsItemZ, SubmitMatchResultRequestZ } from "./riichi-schema"
 
-export const riichiRouter = tsr
-  .platformContext<AppPlatformContext>()
-  .router(appApiContract.riichi, {
-    listMatches: async ({ params, query }) => {
-      return {
-        status: 200,
-        body: {
-          data: await listMatches({
-            leagueId: params.league,
-            matchId: query.matchId,
-            limit: query.limit,
-          }),
-        },
-      }
-    },
+const listMatchesQuerySchema = z.object({
+  matchId: z.optional(z.string()),
+  limit: z.optional(integerRange(1, 1000)),
+})
 
-    updateMatch: async ({ params, body }) => {
-      return {
-        status: 200,
-        body: {
-          data: await updateMatch({
-            ...body.data,
-            ...params,
-          }),
-        },
-      }
-    },
+const updateMatchBodySchema = z.object({
+  data: StandingsItemZ,
+})
 
-    listPlayers: async ({ query }) => {
-      return {
-        status: 200,
-        body: {
-          data: {
-            players: await listPlayers({
-              nameSearch: query.search,
-              limit: query.limit,
-            }),
-          },
-        },
-      }
-    },
-    listLeaderboard: async ({ params: { leagueId }, query: { limit } }) => {
-      return {
-        status: 200,
-        body: {
-          data: await queryLeaderboard({ leagueId, limit: Number(limit) }),
-        },
-      }
-    },
-    submitStandings: async ({ body }) => {
-      return {
-        status: 200,
-        body: {
-          status: "success",
-          data: await submitRiichi(body.data),
-        },
-      }
-    },
-    patchStandings: async ({ params, body }, c) => {
+const listPlayersQuerySchema = z.object({
+  search: z.optional(z.string()),
+  limit: z.optional(integerRange(0, 100)),
+})
+
+const listLeaderboardParamsSchema = z.object({
+  leagueId: z.string(),
+})
+
+const listLeaderboardQuerySchema = z.object({
+  limit: z.optional(integerRange(0, 200)),
+})
+
+const patchStandingsBodySchema = z.object({
+  confirmed: z.boolean(),
+})
+
+export const riichiHandler = new Hono<HonoEnv>()
+  .get(
+    "/leagues/:league/match",
+    zValidator("query", listMatchesQuerySchema),
+    async (c) => {
+      const query = c.req.valid("query")
+      return c.json({
+        data: await listMatches({
+          leagueId: c.req.param("league"),
+          matchId: query.matchId,
+          limit: query.limit,
+        }),
+      })
+    }
+  )
+  .put(
+    "/leagues/:league/match/:match",
+    zValidator("json", updateMatchBodySchema),
+    async (c) => {
+      const body = c.req.valid("json")
+      return c.json({
+        data: await updateMatch({
+          ...body.data,
+          leagueId: c.req.param("league"),
+          matchId: c.req.param("match"),
+        }),
+      })
+    }
+  )
+  .get("/players", zValidator("query", listPlayersQuerySchema), async (c) => {
+    const query = c.req.valid("query")
+    return c.json({
+      data: {
+        players: await listPlayers({
+          nameSearch: query.search,
+          limit: query.limit,
+        }),
+      },
+    })
+  })
+  .get(
+    "/leaderboard/:leagueId",
+    zValidator("param", listLeaderboardParamsSchema),
+    zValidator("query", listLeaderboardQuerySchema),
+    async (c) => {
+      const params = c.req.valid("param")
+      const query = c.req.valid("query")
+      return c.json({
+        data: await queryLeaderboard({
+          leagueId: params.leagueId,
+          limit: Number(query.limit),
+        }),
+      })
+    }
+  )
+  .post(
+    "/match-standing",
+    zValidator("json", SubmitMatchResultRequestZ),
+    async (c) => {
+      const body = c.req.valid("json")
+      await submitRiichi(body.data)
+      return c.json({
+        status: "success",
+      })
+    }
+  )
+  .patch(
+    "/leagues/:leagueId/match/:matchId",
+    zValidator("json", patchStandingsBodySchema),
+    async (c) => {
       await patchStanding({
-        ...params,
-        patchArgs: body,
-        auth: c.authStatus,
+        ...c.req.param(),
+        patchArgs: c.req.valid("json"),
+        auth: c.var.auth,
       })
 
-      return {
-        status: 200,
-        body: {
-          status: "success",
-        },
-      }
-    },
-    deleteStandings: async ({ params }, c) => {
-      await deleteStanding({ ...params, user: c.authStatus })
-      return {
-        status: 200,
-        body: {
-          status: "success",
-        },
-      }
-    },
+      return c.json({
+        status: "success",
+      })
+    }
+  )
+  .delete("/leagues/:leagueId/match/:matchId", async (c) => {
+    await deleteStanding({
+      ...c.req.param(),
+      user: c.var.auth,
+    })
+
+    return c.json({
+      status: "success",
+    })
   })
