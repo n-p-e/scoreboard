@@ -43,19 +43,13 @@ export async function submitRiichi(params: MatchResultSubmission) {
     })
   }
 
-  const standings = calculateMatchStandings(params.matchResult)
-    .sort((a, b) => a.rank - b.rank)
-    .map((item) => ({
+  const standings = orderStandingsByRawPoints(
+    calculateMatchStandings(params.matchResult).map((item, index) => ({
       ...item,
+      finalScore: params.matchResult[index].adjustedFinalScore ?? item.finalScore,
       nameLower: item.name.toLowerCase(),
     }))
-
-  // Apply adjusts
-  params.matchResult.forEach((result, index) => {
-    if (result.adjustedFinalScore != null) {
-      standings[index].finalScore = result.adjustedFinalScore
-    }
-  })
+  )
 
   return await db.transaction(async (tx) => {
     const res = await tx
@@ -135,13 +129,7 @@ export async function updateMatch(
       .set({
         created_at: params.createdAt,
         data: {
-          standings: params.standings
-            .slice()
-            .sort((a, b) => b.finalScore - a.finalScore)
-            .map((item, index) => ({
-              ...item,
-              rank: index,
-            })),
+          standings: orderStandingsByRawPoints(params.standings),
         },
       })
       .where(eq(standingsTable.id, parseInt(params.matchId, 10)))
@@ -339,4 +327,37 @@ function toPlayerItem(obj: InferSelectModel<typeof playersTable>) {
     createdAt: obj.created_at,
     updatedAt: obj.updated_at,
   } satisfies PlayerData
+}
+
+export function orderStandingsByRawPoints<
+  T extends {
+    points: number | null
+    rank: number
+  },
+>(standings: T[]): T[] {
+  return standings
+    .slice()
+    .sort((a, b) => {
+      const cmp0 = compareDescOrder(a.points, b.points)
+      if (cmp0 !== 0) return cmp0
+      return compareAscOrder(a.rank, b.rank)
+    })
+    .map((item, rank) => ({
+      ...item,
+      rank,
+    }))
+}
+
+function compareAscOrder(a: number | null, b: number | null) {
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  return a - b
+}
+
+function compareDescOrder(a: number | null, b: number | null) {
+  if (a == null && b == null) return 0
+  if (a == null) return 1
+  if (b == null) return -1
+  return b - a
 }
