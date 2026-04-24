@@ -20,6 +20,7 @@ describe("Zod Contract Client", () => {
   it("should accumulate paths correctly for nested contracts", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
+      status: 200,
       json: () => Promise.resolve({ id: 123 }),
     })
 
@@ -29,18 +30,23 @@ describe("Zod Contract Client", () => {
       fetcher: mockFetch as any,
     })
 
-    const _ = await client.articles.submit({ body: { title: "Hello" } })
+    const result = await client.articles.submit({ body: { title: "Hello" } })
 
     // Verify path: baseUrl + rootPrefix + subPrefix + routePath
     expect(mockFetch).toHaveBeenCalledWith(
       "https://test.com/api/articles/submit",
       expect.objectContaining({ method: "POST" })
     )
+    expect(result).toStrictEqual({
+      status: 200,
+      body: { id: 123 },
+    })
   })
 
   it("should throw an error if the response fails Zod validation", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
+      status: 200,
       json: () => Promise.resolve({ wrongKey: "data" }), // Fails resBody schema
     })
 
@@ -59,6 +65,7 @@ describe("Zod Contract Client", () => {
   it("should correctly pass the JSON body in the request", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
+      status: 201,
       json: () => Promise.resolve({ id: 1 }),
     })
 
@@ -82,6 +89,7 @@ describe("Zod Contract Client", () => {
   it("should work with top-level routes", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
+      status: 200,
       json: () => Promise.resolve({ pong: true }),
     })
 
@@ -91,12 +99,15 @@ describe("Zod Contract Client", () => {
       fetcher: mockFetch as any,
     })
 
-    const result = await client.ping({})
+    const result = await client.ping()
 
     expect(mockFetch).toHaveBeenCalledWith(
       "https://test.com/api/ping",
       expect.any(Object)
     )
-    expect(result.pong).toBe(true)
+    expect(result).toStrictEqual({
+      status: 200,
+      body: { pong: true },
+    })
   })
 })

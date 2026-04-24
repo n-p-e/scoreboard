@@ -1,4 +1,3 @@
-import { initContract } from "@ts-rest/core"
 import * as z from "zod/mini"
 import { LeagueDataZ } from "~/league/league-schema"
 import {
@@ -7,175 +6,86 @@ import {
   SubmitMatchResultRequestZ,
 } from "~/riichi/riichi-schema"
 import { AuthStatusResultZ, UserLoginZ } from "~/users/users-schema"
-import { integerRange } from "~/utils/schema-util"
+import { createContract, endpoint } from "./contract-dsl"
 
-const c = initContract()
+// --- Users Contract ---
+export const usersContract = createContract({ prefix: "/auth" }).routes({
+  login: endpoint.post("/login", {
+    reqBody: UserLoginZ,
+    resBody: z.object({ token: z.string() }),
+  }),
 
-const usersContract = c.router({
-  login: {
-    method: "POST",
-    path: "/login",
-    body: UserLoginZ,
-    responses: {
-      200: z.object({
-        token: z.string(),
-      }),
-    },
-  },
+  logout: endpoint.post("/logout", {
+    reqBody: z.unknown(),
+    resBody: z.object({ status: z.literal("success") }),
+  }),
 
-  logout: {
-    method: "POST",
-    path: "/logout",
-    body: z.unknown(),
-    responses: {
-      200: z.object({
-        status: z.literal("success"),
-      }),
-    },
-  },
-
-  queryLoginStatus: {
-    method: "GET",
-    path: "/profile",
-    responses: {
-      200: z.object({
-        data: AuthStatusResultZ,
-      }),
-    },
-  },
+  queryLoginStatus: endpoint.get("/profile", {
+    resBody: z.object({ data: AuthStatusResultZ }),
+  }),
 })
 
-const leaguesContract = c.router({
-  listLeagues: {
-    method: "GET",
-    path: "/leagues",
-    responses: {
-      200: z.object({
-        leagues: z.array(LeagueDataZ),
-      }),
-    },
-  },
+// --- Leagues Contract ---
+export const leaguesContract = createContract({ prefix: "" }).routes({
+  listLeagues: endpoint.get("/leagues", {
+    resBody: z.object({ leagues: z.array(LeagueDataZ) }),
+  }),
 })
 
-const riichiContract = c.router({
-  listMatches: {
-    method: "GET",
-    path: "/leagues/:league/match",
-    query: z.object({
-      matchId: z.optional(z.string()),
-      limit: z.optional(integerRange(1, 1000)),
-    }),
-    responses: {
-      200: z.object({
-        data: z.array(StandingsItemZ),
+// --- Riichi Contract ---
+export const riichiContract = createContract({ prefix: "/riichi" }).routes({
+  listMatches: endpoint.get("/leagues/:league/match", {
+    // Note: If your system needs query params, you can wrap them in reqBody
+    resBody: z.object({ data: z.array(StandingsItemZ) }),
+  }),
+
+  updateMatch: endpoint.put("/leagues/:league/match/:match", {
+    reqBody: z.object({ data: StandingsItemZ }),
+    resBody: z.object({ data: StandingsItemZ }),
+  }),
+
+  listPlayers: endpoint.get("/players", {
+    resBody: z.object({
+      data: z.object({
+        players: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            lastActive: z.coerce.date(),
+            createdAt: z.coerce.date(),
+            updatedAt: z.coerce.date(),
+          })
+        ),
       }),
-    },
-  },
-
-  updateMatch: {
-    method: "PUT",
-    path: "/leagues/:league/match/:match",
-    body: z.object({
-      data: StandingsItemZ,
     }),
-    responses: {
-      200: z.object({
-        data: StandingsItemZ,
-      }),
-    },
-  },
+  }),
 
-  listPlayers: {
-    method: "GET",
-    path: "/players",
-    query: z.object({
-      search: z.optional(z.string()),
-      limit: z.optional(integerRange(0, 100)),
-    }),
-    responses: {
-      200: z.object({
-        data: z.object({
-          players: z.array(
-            z.object({
-              id: z.string(),
-              name: z.string(),
-              lastActive: z.coerce.date(),
-              createdAt: z.coerce.date(),
-              updatedAt: z.coerce.date(),
-            })
-          ),
-        }),
-      }),
-    },
-  },
+  listLeaderboard: endpoint.get("/leaderboard/:leagueId", {
+    resBody: z.object({ data: LeaderboardResultZ }),
+  }),
 
-  listLeaderboard: {
-    method: "GET",
-    path: "/leaderboard/:leagueId",
-    pathParams: z.object({
-      leagueId: z.string(),
-    }),
-    query: z.object({
-      limit: z.optional(integerRange(0, 200)),
-    }),
-    responses: {
-      200: z.object({
-        data: LeaderboardResultZ,
-      }),
-    },
-  },
+  submitStandings: endpoint.post("/match-standing", {
+    reqBody: SubmitMatchResultRequestZ,
+    resBody: z.object({ status: z.literal("success") }),
+  }),
 
-  submitStandings: {
-    method: "POST",
-    path: "/match-standing",
-    body: SubmitMatchResultRequestZ,
-    responses: {
-      200: z.object({ status: z.literal("success") }),
-    },
-  },
+  patchStandings: endpoint.patch("/leagues/:leagueId/match/:matchId", {
+    reqBody: z.object({ confirmed: z.boolean() }),
+    resBody: z.object({ status: z.literal("success") }),
+  }),
 
-  patchStandings: {
-    method: "PATCH",
-    path: "/leagues/:leagueId/match/:matchId",
-    body: z.object({
-      confirmed: z.boolean(),
-    }),
-    responses: {
-      200: z.object({ status: z.literal("success") }),
-    },
-  },
-
-  deleteStandings: {
-    method: "DELETE",
-    path: "/leagues/:leagueId/match/:matchId",
-    responses: {
-      200: z.object({ status: z.literal("success") }),
-    },
-  },
+  deleteStandings: endpoint.delete("/leagues/:leagueId/match/:matchId", {
+    resBody: z.object({ status: z.literal("success") }),
+  }),
 })
 
-export const appApiContract = c.router(
-  {
-    users: usersContract,
-    leagues: leaguesContract,
-    riichi: riichiContract,
+// --- Master Contract ---
+export const apiContract = createContract({ prefix: "/api" }).routes({
+  users: usersContract,
+  leagues: leaguesContract,
+  riichi: riichiContract,
 
-    healthcheck: {
-      method: "GET",
-      path: "/healthcheck",
-      responses: {
-        200: z.object({ status: z.literal("success") }),
-      },
-    },
-  },
-  {
-    pathPrefix: "/api",
-    commonResponses: {
-      400: z.object({
-        tag: z.string(),
-        message: z.string(),
-        info: z.object({}),
-      }),
-    },
-  }
-)
+  healthcheck: endpoint.get("/healthcheck", {
+    resBody: z.object({ status: z.literal("success") }),
+  }),
+})

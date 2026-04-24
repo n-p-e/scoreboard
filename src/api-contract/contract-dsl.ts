@@ -1,11 +1,13 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: for type gymnastics */
-import { z } from "zod"
+import * as z from "zod/mini"
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
+type ZodType = z.ZodMiniType
+
 type RouteDef<
-  ReqBody extends z.ZodTypeAny | undefined = undefined,
-  ResBody extends z.ZodTypeAny = z.ZodTypeAny,
+  ReqBody extends ZodType | undefined = undefined,
+  ResBody extends ZodType = ZodType,
 > = {
   method: Method
   path: string
@@ -13,7 +15,7 @@ type RouteDef<
   resBody: ResBody
 }
 
-type AnyRouteDef = RouteDef<z.ZodTypeAny | undefined, z.ZodTypeAny>
+type AnyRouteDef = RouteDef<ZodType | undefined, ZodType>
 
 interface Contract<Definitions = any> {
   prefix: string
@@ -22,28 +24,28 @@ interface Contract<Definitions = any> {
 
 // Utility to define routes
 export const endpoint = {
-  get: <Res extends z.ZodTypeAny>(
+  get: <Res extends ZodType>(
     path: string,
     schemas: { resBody: Res }
   ): RouteDef<undefined, Res> => ({
     method: "GET",
     path,
-    reqBody: undefined,
     ...schemas,
+    reqBody: undefined,
   }),
-  post: <Req extends z.ZodTypeAny, Res extends z.ZodTypeAny>(
+  post: <Req extends ZodType, Res extends ZodType>(
     path: string,
     schemas: { reqBody: Req; resBody: Res }
   ): RouteDef<Req, Res> => ({ method: "POST", path, ...schemas }),
-  put: <Req extends z.ZodTypeAny, Res extends z.ZodTypeAny>(
+  put: <Req extends ZodType, Res extends ZodType>(
     path: string,
     schemas: { reqBody: Req; resBody: Res }
   ): RouteDef<Req, Res> => ({ method: "PUT", path, ...schemas }),
-  patch: <Req extends z.ZodTypeAny, Res extends z.ZodTypeAny>(
+  patch: <Req extends ZodType, Res extends ZodType>(
     path: string,
     schemas: { reqBody: Req; resBody: Res }
   ): RouteDef<Req, Res> => ({ method: "PATCH", path, ...schemas }),
-  delete: <Res extends z.ZodTypeAny>(
+  delete: <Res extends ZodType>(
     path: string,
     schemas: { resBody: Res }
   ): RouteDef<undefined, Res> => ({
@@ -74,9 +76,15 @@ type Client<T> =
   T extends Contract<infer D>
     ? {
         [K in keyof D]: D[K] extends RouteDef<infer ReqBody, infer ResBody>
-          ? ReqBody extends z.ZodTypeAny
-            ? (args: { body: z.input<ReqBody> }) => Promise<z.output<ResBody>>
-            : (args?: { query?: string }) => Promise<z.output<ResBody>>
+          ? ReqBody extends ZodType
+            ? (args: { body: z.input<ReqBody> }) => Promise<{
+                status: number
+                body: z.output<ResBody>
+              }>
+            : (args?: undefined) => Promise<{
+                status: number
+                body: z.output<ResBody>
+              }>
           : Client<D[K]>
       }
     : never
@@ -111,7 +119,7 @@ export function createClient<T extends Contract>({
         }
 
         // If it's a route, return the execution function
-        const route = item as RouteDef<z.ZodTypeAny | undefined, z.ZodTypeAny>
+        const route = item as RouteDef<ZodType | undefined, ZodType>
         return async (args?: { body?: unknown }) => {
           const body = args?.body
           const finalUrl = `${baseUrl.replace(/\/$/, "")}${newPath}${route.path}`
@@ -129,7 +137,10 @@ export function createClient<T extends Contract>({
           })
 
           const json = await response.json()
-          return route.resBody.parse(json)
+          return {
+            status: response.status,
+            body: route.resBody.parse(json),
+          }
         }
       },
     })
