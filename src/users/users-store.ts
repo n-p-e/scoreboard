@@ -100,7 +100,7 @@ export async function parseAuthToken(
       loggedIn: true,
       user: {
         username: parseResult.tokenBody.username,
-        uid: parseResult.tokenBody.sub,
+        uid: parseResult.tokenBody.sub.replace(/^app\.user\//, ""),
       },
       roles: parseResult.tokenBody.roles,
     }

@@ -20,19 +20,19 @@ const usersHandler = new Hono<HonoEnv>()
     cookies.toSetCookieHeaders().forEach((value) => {
       ctx.res.headers.append("set-cookie", value)
     })
-    ctx.json(res)
+    return ctx.json(res)
   })
 
   .post("/logout", async (ctx) => {
     ctx.res.headers.set("set-cookie", "auth_token=; Max-Age=0; Path=/")
-    ctx.json({ status: "success" })
+    return ctx.json({ status: "success" })
   })
 
-  .post("/profile", async (ctx) => {
+  .get("/profile", async (ctx) => {
     //     body: {
     //   data: authStatus ?? { loggedIn: false },
     // },
-    ctx.json(ctx.var.auth)
+    return ctx.json(ctx.var.auth)
   })
 
 export { usersHandler }

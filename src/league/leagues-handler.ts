@@ -7,7 +7,7 @@ export const leaguesHandler = new Hono<HonoEnv>().get(
   "/leagues",
   requiresAdminPrivilege,
   async (c) => {
-    c.json({
+    return c.json({
       leagues: await listLeagues({}),
     })
   }

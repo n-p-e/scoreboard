@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaguesRouteImport } from './routes/leagues'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TLeagueRouteImport } from './routes/t.$league'
+import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as TLeagueSubmitRouteImport } from './routes/t.$league/submit'
 import { Route as TLeagueMatchesRouteImport } from './routes/t.$league/matches'
 import { Route as TLeagueLeaderboardRouteImport } from './routes/t.$league/leaderboard'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 const TLeagueRoute = TLeagueRouteImport.update({
   id: '/t/$league',
   path: '/t/$league',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TLeagueSubmitRoute = TLeagueSubmitRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/leagues': typeof LeaguesRoute
   '/login': typeof LoginRoute
+  '/api/$': typeof ApiSplatRoute
   '/t/$league': typeof TLeagueRouteWithChildren
   '/t/$league/leaderboard': typeof TLeagueLeaderboardRoute
   '/t/$league/matches': typeof TLeagueMatchesRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/leagues': typeof LeaguesRoute
   '/login': typeof LoginRoute
+  '/api/$': typeof ApiSplatRoute
   '/t/$league': typeof TLeagueRouteWithChildren
   '/t/$league/leaderboard': typeof TLeagueLeaderboardRoute
   '/t/$league/matches': typeof TLeagueMatchesRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/leagues': typeof LeaguesRoute
   '/login': typeof LoginRoute
+  '/api/$': typeof ApiSplatRoute
   '/t/$league': typeof TLeagueRouteWithChildren
   '/t/$league/leaderboard': typeof TLeagueLeaderboardRoute
   '/t/$league/matches': typeof TLeagueMatchesRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/leagues'
     | '/login'
+    | '/api/$'
     | '/t/$league'
     | '/t/$league/leaderboard'
     | '/t/$league/matches'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/leagues'
     | '/login'
+    | '/api/$'
     | '/t/$league'
     | '/t/$league/leaderboard'
     | '/t/$league/matches'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/leagues'
     | '/login'
+    | '/api/$'
     | '/t/$league'
     | '/t/$league/leaderboard'
     | '/t/$league/matches'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LeaguesRoute: typeof LeaguesRoute
   LoginRoute: typeof LoginRoute
+  ApiSplatRoute: typeof ApiSplatRoute
   TLeagueRoute: typeof TLeagueRouteWithChildren
 }
 
@@ -158,6 +171,13 @@ declare module '@tanstack/solid-router' {
       path: '/t/$league'
       fullPath: '/t/$league'
       preLoaderRoute: typeof TLeagueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/t/$league/submit': {
@@ -212,6 +232,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LeaguesRoute: LeaguesRoute,
   LoginRoute: LoginRoute,
+  ApiSplatRoute: ApiSplatRoute,
   TLeagueRoute: TLeagueRouteWithChildren,
 }
 export const routeTree = rootRouteImport

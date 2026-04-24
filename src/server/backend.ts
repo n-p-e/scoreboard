@@ -5,10 +5,13 @@ import { usersHandler } from "~/users/users-handler"
 import { authMiddleware } from "./auth-middleware"
 import { HonoEnv } from "./server-types"
 
-const backendApp = new Hono<HonoEnv>()
-  .use(authMiddleware)
+const apiApp = new Hono<HonoEnv>()
+  .use("*", authMiddleware)
+  .get("/healthcheck", async (c) => c.json({ status: "success" }))
   .route("/", usersHandler)
   .route("/", leaguesHandler)
   .route("/", riichiHandler)
+
+const backendApp = new Hono<HonoEnv>().route("/api", apiApp)
 
 export { backendApp }

@@ -18,8 +18,7 @@ export const requiresAdminPrivilege = createMiddleware<{
 }>(async (c, next) => {
   if (!c.var.auth.loggedIn || !c.var.auth.roles.includes("admin")) {
     c.status(403)
-    c.json({ status: "FORBIDDEN", message: "Not logged in" })
-    return
+    return c.json({ status: "FORBIDDEN", message: "Not logged in" })
   }
 
   await next()
