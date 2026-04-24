@@ -14,3 +14,8 @@ export const uuidString = () =>
     z.string(),
     z.transform((s) => Uuid25.parse(s).toString())
   )
+export type CompactUuid = string
+
+export function uuidCompactToNormal(uuid: CompactUuid) {
+  return Uuid25.parse(uuid).toHyphenated()
+}

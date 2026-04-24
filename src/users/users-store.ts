@@ -12,10 +12,16 @@ import {
   type AuthStatusResult,
   type AuthToken,
   AuthTokenZ,
+  ChangePassword,
   type UserLogin,
+  UserLoginZ,
   type UserModel,
   UserZ,
 } from "~/users/users-schema"
+import { uuidCompactToNormal } from "~/utils/schema-util"
+import { getLogger } from "~/logger"
+
+const logger = getLogger("users-store")
 
 export const AuthTokenName = "auth_token"
 
@@ -178,6 +184,30 @@ export async function createUser(params: UserLogin, tx?: Transaction) {
     }
     return toUserModel(res[0])
   })
+}
+
+export async function changePassword({
+  username,
+  oldPassword,
+  newPassword,
+}: ChangePassword) {
+  const { user } = await userLogin(
+    UserLoginZ.parse({ username, password: oldPassword })
+  )
+  const res = await db
+    .update(usersTable)
+    .set({
+      password_hash: await hashPassword(newPassword),
+    })
+    .where(eq(usersTable.id, uuidCompactToNormal(user.uid)))
+    .returning()
+
+  if (res.length !== 1) {
+    logger.warn({
+      msg: "changePasssword: incorrect number of rows updated",
+      updateCount: res.length,
+    })
+  }
 }
 
 async function passwordMatches(

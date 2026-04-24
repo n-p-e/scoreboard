@@ -2,8 +2,8 @@ import { zValidator } from "@hono/zod-validator"
 import { CookieMap } from "bun"
 import { Hono } from "hono"
 import { HonoEnv } from "~/server/server-types"
-import { userLogin } from "~/users/users-store"
-import { UserLoginZ } from "./users-schema"
+import { changePassword, userLogin } from "~/users/users-store"
+import { ChangePasswordZ, UserLoginZ } from "./users-schema"
 
 const usersHandler = new Hono<HonoEnv>()
   .post("/login", zValidator("json", UserLoginZ), async (ctx) => {
@@ -34,5 +34,14 @@ const usersHandler = new Hono<HonoEnv>()
     // },
     return ctx.json(ctx.var.auth)
   })
+
+  .post(
+    "/user/change-password",
+    zValidator("json", ChangePasswordZ),
+    async (c) => {
+      await changePassword(c.req.valid("json"))
+      return c.json({ status: "success" })
+    }
+  )
 
 export { usersHandler }

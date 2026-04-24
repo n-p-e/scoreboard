@@ -7,15 +7,17 @@ export const UserZ = z.object({
 })
 export type UserModel = z.infer<typeof UserZ>
 
+const PasswordZ = z
+  .string()
+  .check(
+    z.minLength(6, "Password should be 6-60 characters long"),
+    z.maxLength(60, "Password should be 6-60 characters long")
+  )
+
 export const UserLoginZ = z
   .object({
     username: z.string().check(z.minLength(1, "Username cannot be empty")),
-    password: z
-      .string()
-      .check(
-        z.minLength(6, "Password should be 6-60 characters long"),
-        z.maxLength(60, "Password should be 6-60 characters long")
-      ),
+    password: PasswordZ,
   })
   .brand<"UserLogin">()
 export type UserLogin = z.infer<typeof UserLoginZ>
@@ -39,3 +41,12 @@ export const AuthStatusResultZ = z.union([
   }),
 ])
 export type AuthStatusResult = z.infer<typeof AuthStatusResultZ>
+
+export const ChangePasswordZ = z
+  .object({
+    username: z.string(),
+    oldPassword: PasswordZ,
+    newPassword: PasswordZ,
+  })
+  .brand()
+export type ChangePassword = z.infer<typeof ChangePasswordZ>
