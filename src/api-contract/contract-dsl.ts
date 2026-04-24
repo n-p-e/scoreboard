@@ -119,6 +119,10 @@ export const createContract = (options: { prefix: string }) => {
 // --- Client Factory ---
 // --- Recursive Client Type ---
 
+interface CommonClientArgs {
+  fetchOptions?: RequestInit
+}
+
 type Client<T> =
   T extends Contract<infer D>
     ? {
@@ -128,8 +132,10 @@ type Client<T> =
           infer ResBody
         >
           ? RouteArgs<PathParams, ReqBody> extends undefined
-            ? (args?: undefined) => ClientResponse<ResBody>
-            : (args: RouteArgs<PathParams, ReqBody>) => ClientResponse<ResBody>
+            ? (args?: CommonClientArgs) => ClientResponse<ResBody>
+            : (
+                args: CommonClientArgs & RouteArgs<PathParams, ReqBody>
+              ) => ClientResponse<ResBody>
           : Client<D[K]>
       }
     : never
@@ -189,6 +195,7 @@ export function createClient<T extends Contract>({
               route.method !== "GET"
                 ? JSON.stringify(parsedReqBody)
                 : undefined,
+            ...args?.fetchOptions,
           })
 
           const json = await response.json()
