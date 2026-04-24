@@ -57,7 +57,7 @@ function MatchesPageContent() {
         Recent Matches:{" "}
         <span class="font-normal">{data().league.displayName ?? ""}</span>
       </h1>
-      <ul class="flex flex-col p-4 gap-4">
+      <ul class="flex flex-col p-4 gap-4" data-testid="matches-list">
         <For each={data().matches}>
           {(item) => (
             <li class="flex flex-col w-full border border-gray-500 bg-slate-900 p-4">

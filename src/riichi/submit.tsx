@@ -361,6 +361,7 @@ const PlayerNameInput = (props: {
                 <Combobox.Item
                   item={item}
                   class="p-2 hover:bg-gray-200 hover:text-black"
+                  data-testid="player-name-input-item"
                 >
                   <Combobox.ItemText>{item.name}</Combobox.ItemText>
                 </Combobox.Item>
