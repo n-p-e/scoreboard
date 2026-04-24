@@ -1,5 +1,5 @@
 import * as z from "zod/mini"
-import { LeagueDataZ } from "~/league/league-schema"
+import { LeagueDataZ, LeagueStatsZ } from "~/league/league-schema"
 import {
   LeaderboardResultZ,
   StandingsItemZ,
@@ -30,6 +30,18 @@ export const usersContract = createContract({ prefix: "" }).routes({
 export const leaguesContract = createContract({ prefix: "" }).routes({
   listLeagues: endpoint.get("/leagues", {
     resBody: z.object({ leagues: z.array(LeagueDataZ) }),
+  }),
+  dailySummary: endpoint.get("/leagues/:leagueId/stats", {
+    pathParams: z.object({
+      leagueId: z.string(),
+    }),
+    queryParams: z.object({
+      period: z.optional(z.enum(["day", "week"])),
+      timezone: z.optional(z.string()),
+      start: z.optional(z.string()),
+      end: z.optional(z.string()),
+    }),
+    resBody: LeagueStatsZ,
   }),
 })
 

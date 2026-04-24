@@ -8,3 +8,27 @@ export const LeagueDataZ = z.object({
   status: z.nullish(z.string()),
 })
 export type LeagueData = z.infer<typeof LeagueDataZ>
+
+export const LeaguePlayerGamesZ = z.object({
+  playerName: z.string(),
+  playerNameLower: z.string(),
+  games: z.number(),
+})
+export type LeaguePlayerGames = z.infer<typeof LeaguePlayerGamesZ>
+
+export const StatsPeriodZ = z.enum(["day", "week"])
+export type StatsPeriod = z.infer<typeof StatsPeriodZ>
+
+export const LeagueStatsItemZ = z.object({
+  startDate: z.string(),
+  endDate: z.string(),
+  players: z.array(LeaguePlayerGamesZ),
+})
+export type LeagueStatsItem = z.infer<typeof LeagueStatsItemZ>
+
+export const LeagueStatsZ = z.object({
+  leagueId: z.string(),
+  period: StatsPeriodZ,
+  items: z.array(LeagueStatsItemZ),
+})
+export type LeagueStats = z.infer<typeof LeagueStatsZ>
