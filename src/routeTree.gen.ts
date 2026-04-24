@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TLeagueRouteImport } from './routes/t.$league'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as TLeagueSubmitRouteImport } from './routes/t.$league/submit'
+import { Route as TLeagueStatsRouteImport } from './routes/t.$league/stats'
 import { Route as TLeagueMatchesRouteImport } from './routes/t.$league/matches'
 import { Route as TLeagueLeaderboardRouteImport } from './routes/t.$league/leaderboard'
 import { Route as TLeagueMatchMatchIdEditRouteImport } from './routes/t.$league/match.$matchId/edit'
@@ -49,6 +50,11 @@ const TLeagueSubmitRoute = TLeagueSubmitRouteImport.update({
   path: '/submit',
   getParentRoute: () => TLeagueRoute,
 } as any)
+const TLeagueStatsRoute = TLeagueStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => TLeagueRoute,
+} as any)
 const TLeagueMatchesRoute = TLeagueMatchesRouteImport.update({
   id: '/matches',
   path: '/matches',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/t/$league': typeof TLeagueRouteWithChildren
   '/t/$league/leaderboard': typeof TLeagueLeaderboardRoute
   '/t/$league/matches': typeof TLeagueMatchesRoute
+  '/t/$league/stats': typeof TLeagueStatsRoute
   '/t/$league/submit': typeof TLeagueSubmitRoute
   '/t/$league/match/$matchId/edit': typeof TLeagueMatchMatchIdEditRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/t/$league': typeof TLeagueRouteWithChildren
   '/t/$league/leaderboard': typeof TLeagueLeaderboardRoute
   '/t/$league/matches': typeof TLeagueMatchesRoute
+  '/t/$league/stats': typeof TLeagueStatsRoute
   '/t/$league/submit': typeof TLeagueSubmitRoute
   '/t/$league/match/$matchId/edit': typeof TLeagueMatchMatchIdEditRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/t/$league': typeof TLeagueRouteWithChildren
   '/t/$league/leaderboard': typeof TLeagueLeaderboardRoute
   '/t/$league/matches': typeof TLeagueMatchesRoute
+  '/t/$league/stats': typeof TLeagueStatsRoute
   '/t/$league/submit': typeof TLeagueSubmitRoute
   '/t/$league/match/$matchId/edit': typeof TLeagueMatchMatchIdEditRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/t/$league'
     | '/t/$league/leaderboard'
     | '/t/$league/matches'
+    | '/t/$league/stats'
     | '/t/$league/submit'
     | '/t/$league/match/$matchId/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/t/$league'
     | '/t/$league/leaderboard'
     | '/t/$league/matches'
+    | '/t/$league/stats'
     | '/t/$league/submit'
     | '/t/$league/match/$matchId/edit'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/t/$league'
     | '/t/$league/leaderboard'
     | '/t/$league/matches'
+    | '/t/$league/stats'
     | '/t/$league/submit'
     | '/t/$league/match/$matchId/edit'
   fileRoutesById: FileRoutesById
@@ -187,6 +199,13 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof TLeagueSubmitRouteImport
       parentRoute: typeof TLeagueRoute
     }
+    '/t/$league/stats': {
+      id: '/t/$league/stats'
+      path: '/stats'
+      fullPath: '/t/$league/stats'
+      preLoaderRoute: typeof TLeagueStatsRouteImport
+      parentRoute: typeof TLeagueRoute
+    }
     '/t/$league/matches': {
       id: '/t/$league/matches'
       path: '/matches'
@@ -214,6 +233,7 @@ declare module '@tanstack/solid-router' {
 interface TLeagueRouteChildren {
   TLeagueLeaderboardRoute: typeof TLeagueLeaderboardRoute
   TLeagueMatchesRoute: typeof TLeagueMatchesRoute
+  TLeagueStatsRoute: typeof TLeagueStatsRoute
   TLeagueSubmitRoute: typeof TLeagueSubmitRoute
   TLeagueMatchMatchIdEditRoute: typeof TLeagueMatchMatchIdEditRoute
 }
@@ -221,6 +241,7 @@ interface TLeagueRouteChildren {
 const TLeagueRouteChildren: TLeagueRouteChildren = {
   TLeagueLeaderboardRoute: TLeagueLeaderboardRoute,
   TLeagueMatchesRoute: TLeagueMatchesRoute,
+  TLeagueStatsRoute: TLeagueStatsRoute,
   TLeagueSubmitRoute: TLeagueSubmitRoute,
   TLeagueMatchMatchIdEditRoute: TLeagueMatchMatchIdEditRoute,
 }

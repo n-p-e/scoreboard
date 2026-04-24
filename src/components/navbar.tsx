@@ -75,6 +75,12 @@ export const Dropdown = () => {
             >
               Log out
             </button>
+            {/* <NavbarLink
+              to={`/t/$league/summary`}
+              params={{ league: params().league }}
+            >
+              Summary
+            </NavbarLink> */}
           </Show>
           <Show when={!loginState()?.loggedIn}>
             <button
