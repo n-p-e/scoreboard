@@ -17,7 +17,7 @@ import { listMatches } from "~/riichi/riichi-store"
 import { queryLoginState } from "~/users/login-state.js"
 
 const loader = createServerFn()
-  .validator(z.object({ leagueId: z.string() }))
+  .inputValidator(z.object({ leagueId: z.string() }))
   .handler(async ({ data }) => {
     // await new Promise((resolve) => setTimeout(resolve, 500))
     const leagueId = data.leagueId

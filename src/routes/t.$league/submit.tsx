@@ -8,7 +8,7 @@ import { RiichiResultSubmission } from "~/riichi/submit"
 import { LeagueDescription } from "~/riichi/submit-page-notes"
 
 const loader = createServerFn()
-  .validator(z.object({ leagueId: z.string() }))
+  .inputValidator(z.object({ leagueId: z.string() }))
   .handler(async ({ data }) => {
     return { league: await findLeague(data.leagueId) }
   })
