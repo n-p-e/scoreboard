@@ -71,6 +71,15 @@ export const Dropdown = () => {
               type="button"
               class={style.dropdownItem}
               onClick={() => {
+                navigate({ to: "/user/change-password" })
+              }}
+            >
+              Change password
+            </button>
+            <button
+              type="button"
+              class={style.dropdownItem}
+              onClick={() => {
                 appApiClient.users
                   .logout({ body: {} })
                   .then(() => window.location.reload())
