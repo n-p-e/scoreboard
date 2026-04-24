@@ -1,9 +1,15 @@
-import { createFileRoute } from "@tanstack/solid-router"
+import { createFileRoute, redirect } from "@tanstack/solid-router"
 import { Button } from "~/components/button"
 import { Link } from "~/components/Link"
+import { fetchLoginState } from "~/users/login-state"
 
 export const Route = createFileRoute("/")({
   component: Home,
+  beforeLoad: async () => {
+    if ((await fetchLoginState()).loggedIn) {
+      throw redirect({ to: "/leagues" })
+    }
+  },
 })
 
 function Home() {
