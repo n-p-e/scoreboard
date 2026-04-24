@@ -32,7 +32,6 @@ function LoginPage() {
               const res = await appApiClient.users.login({
                 body: parseResult.data,
               })
-              setLoading(false)
               if (res.status === 200) {
                 const search = new URLSearchParams(window.location.search)
                 navigate({
@@ -43,12 +42,14 @@ function LoginPage() {
               } else {
                 setError("Could not log in")
               }
+              setLoading(false)
             })()
           } else {
             setError(
               parseResult.error.issues[0]?.message ?? "Please check your input"
             )
           }
+          setLoading(false)
         }}
       >
         <div class="flex flex-col py-4">
@@ -58,13 +59,13 @@ function LoginPage() {
           name="username"
           type="text"
           placeholder="Username"
-          class="bg-gray-900 text-lg border-1 px-2 border-gray-700 placeholder-gray-600"
+          class="bg-gray-900 text-lg border px-2 border-gray-700 placeholder-gray-600"
         />
         <input
           name="password"
           type="password"
           placeholder="Password"
-          class="bg-gray-900 text-lg border-1 px-2 border-gray-700 placeholder-gray-600"
+          class="bg-gray-900 text-lg border px-2 border-gray-700 placeholder-gray-600"
         />
         <Button type="submit" variant="outline" disabled={loading()}>
           Log in

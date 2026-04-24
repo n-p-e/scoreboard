@@ -5,7 +5,7 @@ import { fetchLoginState } from "~/users/login-state"
 
 export const Route = createFileRoute("/")({
   component: Home,
-  beforeLoad: async () => {
+  loader: async () => {
     if ((await fetchLoginState()).loggedIn) {
       throw redirect({ to: "/leagues" })
     }

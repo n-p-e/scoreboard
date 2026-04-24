@@ -5,13 +5,11 @@ import { Link } from "~/components/Link"
 import { fetchLoginState } from "~/users/login-state"
 
 export const Route = createFileRoute("/leagues")({
-  beforeLoad: async () => {
+  loader: async (ctx) => {
     if (!(await fetchLoginState()).loggedIn) {
       throw redirect({ to: "/login" })
     }
-  },
 
-  loader: async (ctx) => {
     const resp = await appApiClient.leagues.listLeagues({
       fetchOptions: {
         signal: ctx.abortController.signal,
