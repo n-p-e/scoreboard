@@ -7,6 +7,7 @@ import {
 } from "~/riichi/riichi-schema"
 import { AuthStatusResultZ, UserLoginZ } from "~/users/users-schema"
 import { createContract, endpoint } from "./contract-dsl"
+import { integerRange } from "~/utils/schema-util"
 
 // --- Users Contract ---
 export const usersContract = createContract({ prefix: "/auth" }).routes({
@@ -35,6 +36,10 @@ export const leaguesContract = createContract({ prefix: "" }).routes({
 // --- Riichi Contract ---
 export const riichiContract = createContract({ prefix: "/riichi" }).routes({
   listMatches: endpoint.get("/leagues/:league/match", {
+    queryParams: z.object({
+      matchId: z.optional(z.string()),
+      limit: z.optional(integerRange(1, 1000)),
+    }),
     pathParams: z.object({
       league: z.string(),
     }),
@@ -51,6 +56,10 @@ export const riichiContract = createContract({ prefix: "/riichi" }).routes({
   }),
 
   listPlayers: endpoint.get("/players", {
+    queryParams: z.object({
+      search: z.optional(z.string()),
+      limit: z.optional(integerRange(0, 100)),
+    }),
     resBody: z.object({
       data: z.object({
         players: z.array(

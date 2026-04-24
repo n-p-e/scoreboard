@@ -13,8 +13,6 @@
         "@tanstack/solid-router": "^1.168.20",
         "@tanstack/solid-router-devtools": "^1.166.13",
         "@tanstack/solid-start": "^1.167.37",
-        "@ts-rest/core": "3.53.0-rc.1",
-        "@ts-rest/serverless": "3.53.0-rc.1",
         "date-fns": "^4.1.0",
         "dotenv": "^17.4.2",
         "drizzle-orm": "^0.45.2",
@@ -357,10 +355,6 @@
 
     "@tanstack/virtual-file-routes": ["@tanstack/virtual-file-routes@1.161.7", "", { "bin": { "intent": "bin/intent.js" } }, "sha512-olW33+Cn+bsCsZKPwEGhlkqS6w3M2slFv11JIobdnCFKMLG97oAI2kWKdx5/zsywTL8flpnoIgaZZPlQTFYhdQ=="],
 
-    "@ts-rest/core": ["@ts-rest/core@3.53.0-rc.1", "", { "peerDependencies": { "@types/node": "^18.18.7 || >=20.8.4" }, "optionalPeers": ["@types/node"] }, "sha512-hDMXqKHSys6w+kXFW1Q6EvN8QgRvtXKXJ2TpYByKI4TquaPjiTOv99aLD26X4LNRzdna8Ci1PVyzr0jYZv0oNQ=="],
-
-    "@ts-rest/serverless": ["@ts-rest/serverless@3.53.0-rc.1", "", { "dependencies": { "itty-router": "^5.0.9" }, "peerDependencies": { "@azure/functions": "^4.0.0", "@ts-rest/core": "3.53.0-rc.1", "@types/aws-lambda": "^8.10.115", "next": "^12.0.0 || ^13.0.0 || ^14.0.0" }, "optionalPeers": ["@azure/functions", "@types/aws-lambda", "next"] }, "sha512-MtwjH3GqGXx4r4Tyqb381JNN5W7tKZt491Yp0OSAxU2cdduJ3s9lNZV4+AFbDTdY+ZyInlQntCIr94+VBSr+TA=="],
-
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
     "@types/babel__core": ["@types/babel__core@7.20.5", "", { "dependencies": { "@babel/parser": "^7.20.7", "@babel/types": "^7.20.7", "@types/babel__generator": "*", "@types/babel__template": "*", "@types/babel__traverse": "*" } }, "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA=="],
@@ -692,8 +686,6 @@
     "is-what": ["is-what@4.1.16", "", {}, "sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A=="],
 
     "isbot": ["isbot@5.1.29", "", {}, "sha512-DelDWWoa3mBoyWTq3wjp+GIWx/yZdN7zLUE7NFhKjAiJ+uJVRkbLlwykdduCE4sPUUy8mlTYTmdhBUYu91F+sw=="],
-
-    "itty-router": ["itty-router@5.0.21", "", {}, "sha512-SrmsBfXtdoIkuDMTMXqCT0kYSl9OlQZLC7llHs4fE26dZlGfi0Cm4adNL7q/ygpWyoTZobZ547h5SZu/PwB+cg=="],
 
     "jiti": ["jiti@2.6.1", "", { "bin": { "jiti": "lib/jiti-cli.mjs" } }, "sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ=="],
 
