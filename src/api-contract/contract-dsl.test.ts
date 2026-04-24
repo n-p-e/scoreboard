@@ -8,12 +8,26 @@ describe("Zod Contract Client", () => {
       reqBody: z.object({ title: z.string() }),
       resBody: z.object({ id: z.number() }),
     }),
+    updateSeasonScore: endpoint.patch("/:articleId/score/:season", {
+      pathParams: z.object({
+        articleId: z.string(),
+        season: z.number(),
+      }),
+      reqBody: z.object({ delta: z.number() }),
+      resBody: z.object({ ok: z.boolean() }),
+    }),
   })
 
   const rootContract = createContract({ prefix: "/api" }).routes({
     articles: articlesContract,
     ping: endpoint.get("/ping", {
       resBody: z.object({ pong: z.boolean() }),
+    }),
+    profile: endpoint.get("/users/:userId", {
+      pathParams: z.object({
+        userId: z.string(),
+      }),
+      resBody: z.object({ id: z.string() }),
     }),
   })
 
@@ -109,5 +123,88 @@ describe("Zod Contract Client", () => {
       status: 200,
       body: { pong: true },
     })
+  })
+
+  it("should interpolate top-level path params", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ id: "alice%20smith" }),
+    })
+
+    const client = createClient({
+      contract: rootContract,
+      baseUrl: "https://test.com",
+      fetcher: mockFetch as any,
+    })
+
+    const result = await client.profile({
+      params: { userId: "alice smith" },
+    })
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://test.com/api/users/alice%20smith",
+      expect.any(Object)
+    )
+    expect(result).toStrictEqual({
+      status: 200,
+      body: { id: "alice%20smith" },
+    })
+  })
+
+  it("should interpolate nested path params and send body", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ ok: true }),
+    })
+
+    const client = createClient({
+      contract: rootContract,
+      baseUrl: "https://test.com",
+      fetcher: mockFetch as any,
+    })
+
+    const result = await client.articles.updateSeasonScore({
+      params: {
+        articleId: "abc",
+        season: 2026,
+      },
+      body: {
+        delta: -10,
+      },
+    })
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://test.com/api/articles/abc/score/2026",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ delta: -10 }),
+      })
+    )
+    expect(result).toStrictEqual({
+      status: 200,
+      body: { ok: true },
+    })
+  })
+
+  it("should throw if path params fail validation", async () => {
+    const client = createClient({
+      contract: rootContract,
+      baseUrl: "https://test.com",
+      fetcher: vi.fn() as any,
+    })
+
+    await expect(
+      client.articles.updateSeasonScore({
+        params: {
+          articleId: "abc",
+          season: "2026" as any,
+        },
+        body: {
+          delta: -10,
+        },
+      })
+    ).rejects.toThrow()
   })
 })

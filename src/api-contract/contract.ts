@@ -35,7 +35,9 @@ export const leaguesContract = createContract({ prefix: "" }).routes({
 // --- Riichi Contract ---
 export const riichiContract = createContract({ prefix: "/riichi" }).routes({
   listMatches: endpoint.get("/leagues/:league/match", {
-    // Note: If your system needs query params, you can wrap them in reqBody
+    pathParams: z.object({
+      league: z.string(),
+    }),
     resBody: z.object({ data: z.array(StandingsItemZ) }),
   }),
 

@@ -6,51 +6,98 @@ type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 type ZodType = z.ZodMiniType
 
 type RouteDef<
+  PathParams extends ZodType | undefined = undefined,
   ReqBody extends ZodType | undefined = undefined,
   ResBody extends ZodType = ZodType,
 > = {
   method: Method
   path: string
+  pathParams: PathParams
   reqBody: ReqBody
   resBody: ResBody
 }
 
-type AnyRouteDef = RouteDef<ZodType | undefined, ZodType>
+type AnyRouteDef = RouteDef<ZodType | undefined, ZodType | undefined, ZodType>
 
 interface Contract<Definitions = any> {
   prefix: string
   definitions: Definitions
 }
 
+type ClientResponse<ResBody extends ZodType> = Promise<{
+  status: number
+  body: z.output<ResBody>
+}>
+
+type RouteArgs<
+  PathParams extends ZodType | undefined,
+  ReqBody extends ZodType | undefined,
+> = [PathParams] extends [ZodType]
+  ? [ReqBody] extends [ZodType]
+    ? { params: z.input<PathParams>; body: z.input<ReqBody> }
+    : { params: z.input<PathParams> }
+  : [ReqBody] extends [ZodType]
+    ? { body: z.input<ReqBody> }
+    : undefined
+
 // Utility to define routes
 export const endpoint = {
-  get: <Res extends ZodType>(
+  get: <Res extends ZodType, Params extends ZodType | undefined = undefined>(
     path: string,
-    schemas: { resBody: Res }
-  ): RouteDef<undefined, Res> => ({
+    schemas: { pathParams?: Params; resBody: Res }
+  ): RouteDef<Params, undefined, Res> => ({
     method: "GET",
     path,
+    pathParams: schemas.pathParams as Params,
     ...schemas,
     reqBody: undefined,
   }),
-  post: <Req extends ZodType, Res extends ZodType>(
+  post: <
+    Req extends ZodType,
+    Res extends ZodType,
+    Params extends ZodType | undefined = undefined,
+  >(
     path: string,
-    schemas: { reqBody: Req; resBody: Res }
-  ): RouteDef<Req, Res> => ({ method: "POST", path, ...schemas }),
-  put: <Req extends ZodType, Res extends ZodType>(
+    schemas: { pathParams?: Params; reqBody: Req; resBody: Res }
+  ): RouteDef<Params, Req, Res> => ({
+    method: "POST",
+    path,
+    pathParams: schemas.pathParams as Params,
+    ...schemas,
+  }),
+  put: <
+    Req extends ZodType,
+    Res extends ZodType,
+    Params extends ZodType | undefined = undefined,
+  >(
     path: string,
-    schemas: { reqBody: Req; resBody: Res }
-  ): RouteDef<Req, Res> => ({ method: "PUT", path, ...schemas }),
-  patch: <Req extends ZodType, Res extends ZodType>(
+    schemas: { pathParams?: Params; reqBody: Req; resBody: Res }
+  ): RouteDef<Params, Req, Res> => ({
+    method: "PUT",
+    path,
+    pathParams: schemas.pathParams as Params,
+    ...schemas,
+  }),
+  patch: <
+    Req extends ZodType,
+    Res extends ZodType,
+    Params extends ZodType | undefined = undefined,
+  >(
     path: string,
-    schemas: { reqBody: Req; resBody: Res }
-  ): RouteDef<Req, Res> => ({ method: "PATCH", path, ...schemas }),
-  delete: <Res extends ZodType>(
+    schemas: { pathParams?: Params; reqBody: Req; resBody: Res }
+  ): RouteDef<Params, Req, Res> => ({
+    method: "PATCH",
+    path,
+    pathParams: schemas.pathParams as Params,
+    ...schemas,
+  }),
+  delete: <Res extends ZodType, Params extends ZodType | undefined = undefined>(
     path: string,
-    schemas: { resBody: Res }
-  ): RouteDef<undefined, Res> => ({
+    schemas: { pathParams?: Params; resBody: Res }
+  ): RouteDef<Params, undefined, Res> => ({
     method: "DELETE",
     path,
+    pathParams: schemas.pathParams as Params,
     reqBody: undefined,
     ...schemas,
   }),
@@ -75,16 +122,14 @@ export const createContract = (options: { prefix: string }) => {
 type Client<T> =
   T extends Contract<infer D>
     ? {
-        [K in keyof D]: D[K] extends RouteDef<infer ReqBody, infer ResBody>
-          ? ReqBody extends ZodType
-            ? (args: { body: z.input<ReqBody> }) => Promise<{
-                status: number
-                body: z.output<ResBody>
-              }>
-            : (args?: undefined) => Promise<{
-                status: number
-                body: z.output<ResBody>
-              }>
+        [K in keyof D]: D[K] extends RouteDef<
+          infer PathParams,
+          infer ReqBody,
+          infer ResBody
+        >
+          ? RouteArgs<PathParams, ReqBody> extends undefined
+            ? (args?: undefined) => ClientResponse<ResBody>
+            : (args: RouteArgs<PathParams, ReqBody>) => ClientResponse<ResBody>
           : Client<D[K]>
       }
     : never
@@ -119,10 +164,20 @@ export function createClient<T extends Contract>({
         }
 
         // If it's a route, return the execution function
-        const route = item as RouteDef<ZodType | undefined, ZodType>
-        return async (args?: { body?: unknown }) => {
+        const route = item as RouteDef<
+          ZodType | undefined,
+          ZodType | undefined,
+          ZodType
+        >
+        return async (args?: {
+          params?: unknown
+          body?: unknown
+          fetchOptions?: RequestInit
+        }) => {
           const body = args?.body
-          const finalUrl = `${baseUrl.replace(/\/$/, "")}${newPath}${route.path}`
+          const params = route.pathParams?.parse(args?.params)
+          const finalPath = interpolatePath(route.path, params)
+          const finalUrl = `${baseUrl.replace(/\/$/, "")}${newPath}${finalPath}`
 
           // parse the req body through zod here
           const parsedReqBody = route.reqBody?.parse(body)
@@ -147,4 +202,15 @@ export function createClient<T extends Contract>({
   }
 
   return createRecursiveProxy(contract, "")
+}
+
+function interpolatePath(path: string, params: unknown) {
+  const pathParams = params as Record<string, unknown> | undefined
+  return path.replaceAll(/:([A-Za-z0-9_]+)/g, (_, key: string) => {
+    const value = pathParams?.[key]
+    if (typeof value !== "string" && typeof value !== "number") {
+      throw new Error(`Invalid or missing path param: ${key}`)
+    }
+    return encodeURIComponent(String(value))
+  })
 }
