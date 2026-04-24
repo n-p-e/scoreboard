@@ -8,10 +8,20 @@ describe("Zod Contract Client", () => {
       reqBody: z.object({ title: z.string() }),
       resBody: z.object({ id: z.number() }),
     }),
+    search: endpoint.get("/search", {
+      queryParams: z.object({
+        q: z.string(),
+        page: z.number().optional(),
+      }),
+      resBody: z.object({ ok: z.boolean() }),
+    }),
     updateSeasonScore: endpoint.patch("/:articleId/score/:season", {
       pathParams: z.object({
         articleId: z.string(),
         season: z.number(),
+      }),
+      queryParams: z.object({
+        source: z.string(),
       }),
       reqBody: z.object({ delta: z.number() }),
       resBody: z.object({ ok: z.boolean() }),
@@ -170,16 +180,51 @@ describe("Zod Contract Client", () => {
         articleId: "abc",
         season: 2026,
       },
+      query: {
+        source: "manual penalty",
+      },
       body: {
         delta: -10,
       },
     })
 
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://test.com/api/articles/abc/score/2026",
+      "https://test.com/api/articles/abc/score/2026?source=manual+penalty",
       expect.objectContaining({
         method: "PATCH",
         body: JSON.stringify({ delta: -10 }),
+      })
+    )
+    expect(result).toStrictEqual({
+      status: 200,
+      body: { ok: true },
+    })
+  })
+
+  it("should append query params", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ ok: true }),
+    })
+
+    const client = createClient({
+      contract: rootContract,
+      baseUrl: "https://test.com",
+      fetcher: mockFetch as any,
+    })
+
+    const result = await client.articles.search({
+      query: {
+        q: "hello world",
+        page: 2,
+      },
+    })
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://test.com/api/articles/search?q=hello+world&page=2",
+      expect.objectContaining({
+        method: "GET",
       })
     )
     expect(result).toStrictEqual({
@@ -201,8 +246,27 @@ describe("Zod Contract Client", () => {
           articleId: "abc",
           season: "2026" as any,
         },
+        query: {
+          source: "manual",
+        },
         body: {
           delta: -10,
+        },
+      })
+    ).rejects.toThrow()
+  })
+
+  it("should throw if query params fail validation", async () => {
+    const client = createClient({
+      contract: rootContract,
+      baseUrl: "https://test.com",
+      fetcher: vi.fn() as any,
+    })
+
+    await expect(
+      client.articles.search({
+        query: {
+          q: 123 as any,
         },
       })
     ).rejects.toThrow()

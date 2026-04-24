@@ -4,20 +4,28 @@ import * as z from "zod/mini"
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 type ZodType = z.ZodMiniType
+type Simplify<T> = { [K in keyof T]: T[K] } & {}
 
 type RouteDef<
   PathParams extends ZodType | undefined = undefined,
+  QueryParams extends ZodType | undefined = undefined,
   ReqBody extends ZodType | undefined = undefined,
   ResBody extends ZodType = ZodType,
 > = {
   method: Method
   path: string
   pathParams: PathParams
+  queryParams: QueryParams
   reqBody: ReqBody
   resBody: ResBody
 }
 
-type AnyRouteDef = RouteDef<ZodType | undefined, ZodType | undefined, ZodType>
+type AnyRouteDef = RouteDef<
+  ZodType | undefined,
+  ZodType | undefined,
+  ZodType | undefined,
+  ZodType
+>
 
 interface Contract<Definitions = any> {
   prefix: string
@@ -31,24 +39,36 @@ type ClientResponse<ResBody extends ZodType> = Promise<{
 
 type RouteArgs<
   PathParams extends ZodType | undefined,
+  QueryParams extends ZodType | undefined,
   ReqBody extends ZodType | undefined,
-> = [PathParams] extends [ZodType]
-  ? [ReqBody] extends [ZodType]
-    ? { params: z.input<PathParams>; body: z.input<ReqBody> }
-    : { params: z.input<PathParams> }
-  : [ReqBody] extends [ZodType]
-    ? { body: z.input<ReqBody> }
-    : undefined
+> = keyof Simplify<
+  ([PathParams] extends [ZodType] ? { params: z.input<PathParams> } : {}) &
+    ([QueryParams] extends [ZodType] ? { query: z.input<QueryParams> } : {}) &
+    ([ReqBody] extends [ZodType] ? { body: z.input<ReqBody> } : {})
+> extends never
+  ? undefined
+  : Simplify<
+      ([PathParams] extends [ZodType] ? { params: z.input<PathParams> } : {}) &
+        ([QueryParams] extends [ZodType]
+          ? { query: z.input<QueryParams> }
+          : {}) &
+        ([ReqBody] extends [ZodType] ? { body: z.input<ReqBody> } : {})
+    >
 
 // Utility to define routes
 export const endpoint = {
-  get: <Res extends ZodType, Params extends ZodType | undefined = undefined>(
+  get: <
+    Res extends ZodType,
+    Params extends ZodType | undefined = undefined,
+    Query extends ZodType | undefined = undefined,
+  >(
     path: string,
-    schemas: { pathParams?: Params; resBody: Res }
-  ): RouteDef<Params, undefined, Res> => ({
+    schemas: { pathParams?: Params; queryParams?: Query; resBody: Res }
+  ): RouteDef<Params, Query, undefined, Res> => ({
     method: "GET",
     path,
     pathParams: schemas.pathParams as Params,
+    queryParams: schemas.queryParams as Query,
     ...schemas,
     reqBody: undefined,
   }),
@@ -56,48 +76,74 @@ export const endpoint = {
     Req extends ZodType,
     Res extends ZodType,
     Params extends ZodType | undefined = undefined,
+    Query extends ZodType | undefined = undefined,
   >(
     path: string,
-    schemas: { pathParams?: Params; reqBody: Req; resBody: Res }
-  ): RouteDef<Params, Req, Res> => ({
+    schemas: {
+      pathParams?: Params
+      queryParams?: Query
+      reqBody: Req
+      resBody: Res
+    }
+  ): RouteDef<Params, Query, Req, Res> => ({
     method: "POST",
     path,
     pathParams: schemas.pathParams as Params,
+    queryParams: schemas.queryParams as Query,
     ...schemas,
   }),
   put: <
     Req extends ZodType,
     Res extends ZodType,
     Params extends ZodType | undefined = undefined,
+    Query extends ZodType | undefined = undefined,
   >(
     path: string,
-    schemas: { pathParams?: Params; reqBody: Req; resBody: Res }
-  ): RouteDef<Params, Req, Res> => ({
+    schemas: {
+      pathParams?: Params
+      queryParams?: Query
+      reqBody: Req
+      resBody: Res
+    }
+  ): RouteDef<Params, Query, Req, Res> => ({
     method: "PUT",
     path,
     pathParams: schemas.pathParams as Params,
+    queryParams: schemas.queryParams as Query,
     ...schemas,
   }),
   patch: <
     Req extends ZodType,
     Res extends ZodType,
     Params extends ZodType | undefined = undefined,
+    Query extends ZodType | undefined = undefined,
   >(
     path: string,
-    schemas: { pathParams?: Params; reqBody: Req; resBody: Res }
-  ): RouteDef<Params, Req, Res> => ({
+    schemas: {
+      pathParams?: Params
+      queryParams?: Query
+      reqBody: Req
+      resBody: Res
+    }
+  ): RouteDef<Params, Query, Req, Res> => ({
     method: "PATCH",
     path,
     pathParams: schemas.pathParams as Params,
+    queryParams: schemas.queryParams as Query,
     ...schemas,
   }),
-  delete: <Res extends ZodType, Params extends ZodType | undefined = undefined>(
+  delete: <
+    Res extends ZodType,
+    Params extends ZodType | undefined = undefined,
+    Query extends ZodType | undefined = undefined,
+  >(
     path: string,
-    schemas: { pathParams?: Params; resBody: Res }
-  ): RouteDef<Params, undefined, Res> => ({
+    schemas: { pathParams?: Params; queryParams?: Query; resBody: Res }
+  ): RouteDef<Params, Query, undefined, Res> => ({
     method: "DELETE",
     path,
     pathParams: schemas.pathParams as Params,
+    queryParams: schemas.queryParams as Query,
     reqBody: undefined,
     ...schemas,
   }),
@@ -128,13 +174,15 @@ type Client<T> =
     ? {
         [K in keyof D]: D[K] extends RouteDef<
           infer PathParams,
+          infer QueryParams,
           infer ReqBody,
           infer ResBody
         >
-          ? RouteArgs<PathParams, ReqBody> extends undefined
+          ? RouteArgs<PathParams, QueryParams, ReqBody> extends undefined
             ? (args?: CommonClientArgs) => ClientResponse<ResBody>
             : (
-                args: CommonClientArgs & RouteArgs<PathParams, ReqBody>
+                args: CommonClientArgs &
+                  RouteArgs<PathParams, QueryParams, ReqBody>
               ) => ClientResponse<ResBody>
           : Client<D[K]>
       }
@@ -173,17 +221,23 @@ export function createClient<T extends Contract>({
         const route = item as RouteDef<
           ZodType | undefined,
           ZodType | undefined,
+          ZodType | undefined,
           ZodType
         >
         return async (args?: {
           params?: unknown
+          query?: unknown
           body?: unknown
           fetchOptions?: RequestInit
         }) => {
           const body = args?.body
           const params = route.pathParams?.parse(args?.params)
+          const query = route.queryParams?.parse(args?.query)
           const finalPath = interpolatePath(route.path, params)
-          const finalUrl = `${baseUrl.replace(/\/$/, "")}${newPath}${finalPath}`
+          const finalUrl = appendQueryString(
+            `${baseUrl.replace(/\/$/, "")}${newPath}${finalPath}`,
+            query
+          )
 
           // parse the req body through zod here
           const parsedReqBody = route.reqBody?.parse(body)
@@ -220,4 +274,22 @@ function interpolatePath(path: string, params: unknown) {
     }
     return encodeURIComponent(String(value))
   })
+}
+
+function appendQueryString(url: string, query: unknown) {
+  const queryParams = query as Record<string, unknown> | undefined
+  if (queryParams == null) return url
+
+  const searchParams = new URLSearchParams()
+  for (const [key, value] of Object.entries(queryParams)) {
+    if (value == null) continue
+    if (typeof value !== "string" && typeof value !== "number") {
+      throw new Error(`Invalid query param: ${key}`)
+    }
+    searchParams.set(key, String(value))
+  }
+
+  const queryString = searchParams.toString()
+  if (queryString.length === 0) return url
+  return `${url}?${queryString}`
 }
