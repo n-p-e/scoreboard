@@ -1,16 +1,20 @@
 /// <reference types="vite/client" />
-import { QueryClient } from "@tanstack/solid-query"
+import { QueryClient, QueryClientProvider } from "@tanstack/solid-query"
+import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
 import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
+  useRouter,
 } from "@tanstack/solid-router"
+import { TanStackRouterDevtools } from "@tanstack/solid-router-devtools"
 import * as Solid from "solid-js"
 import { HydrationScript } from "solid-js/web"
 import { DefaultCatchBoundary } from "~/components/errors"
 import { Loading } from "~/components/loading"
 import { NotFound } from "~/components/NotFound"
+
 import appCss from "~/styles/app.css?url"
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
@@ -65,9 +69,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 )
 
 function RootComponent() {
+  const router = useRouter()
+
+  // Workaround: using nitro server seems to break automatic client install in router.ts
   return (
     <RootDocument>
-      <Outlet />
+      <QueryClientProvider client={router.options.context.queryClient}>
+        <Outlet />
+      </QueryClientProvider>
     </RootDocument>
   )
 }
@@ -80,7 +89,9 @@ function RootDocument({ children }: Readonly<{ children: Solid.JSX.Element }>) {
       </head>
       <body>
         <HeadContent />
-        <Solid.Suspense>{children}</Solid.Suspense>
+        {children}
+        <TanStackRouterDevtools position="bottom-right" />
+        <SolidQueryDevtools buttonPosition="bottom-left" />
         <Scripts />
       </body>
     </html>

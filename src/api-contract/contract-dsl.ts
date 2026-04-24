@@ -1,5 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: for type gymnastics */
 import * as z from "zod/mini"
+import { AppErrorInfo } from "~/error/app-error"
+import { HttpStatusError } from "~/error/http-error"
 
 export type Fetcher = (
   ...args: Parameters<typeof fetch>
@@ -254,6 +256,26 @@ export function createClient<T extends Contract>({
                 : undefined,
             ...args?.fetchOptions,
           })
+
+          if (!response.ok) {
+            // Attempt to parse structured error JSON from the backend
+            let errorData: AppErrorInfo
+
+            try {
+              errorData = await response.json()
+            } catch (_e) {
+              // Fallback if the body isn't JSON or is empty
+              errorData = {
+                tag: "parse-error",
+                message: response.statusText || "Unexpected response format",
+              }
+            }
+            throw new HttpStatusError(
+              response.status,
+              String(errorData.message ?? "unknown error"),
+              errorData
+            )
+          }
 
           const json = await response.json()
           return {

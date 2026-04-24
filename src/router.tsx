@@ -6,7 +6,7 @@ import { NotFound } from "./components/NotFound"
 import { routeTree } from "./routeTree.gen"
 
 export function getRouter() {
-  const queryClient = new QueryClient()
+  const queryClient = new QueryClient({})
 
   const router = createTanStackRouter({
     routeTree,
@@ -15,13 +15,14 @@ export function getRouter() {
     defaultPreload: "intent",
     defaultErrorComponent: DefaultCatchBoundary,
     defaultNotFoundComponent: () => <NotFound />,
-    scrollRestoration: true,
+    // scrollRestoration: true,
   })
 
   setupRouterSsrQueryIntegration({
     router,
     queryClient,
   })
+
   return router
 }
 

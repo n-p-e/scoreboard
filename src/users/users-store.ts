@@ -191,6 +191,11 @@ export async function changePassword({
   oldPassword,
   newPassword,
 }: ChangePassword) {
+  logger.info({
+    msg: "changePassword",
+    username,
+  })
+
   const { user } = await userLogin(
     UserLoginZ.parse({ username, password: oldPassword })
   )

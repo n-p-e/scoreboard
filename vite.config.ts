@@ -9,9 +9,10 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [
-    nitro(),
+    // nitro(),
     tailwindcss(),
     tanstackStart(),
+    nitro(),
     solidPlugin({ ssr: true }),
   ],
   build: {

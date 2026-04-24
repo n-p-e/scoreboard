@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/solid-query"
+import { useMutation, useQueryClient } from "@tanstack/solid-query"
 import { createFileRoute, redirect } from "@tanstack/solid-router"
 import { appApiClient } from "~/api-contract/client"
 import { Button } from "~/components/button"
@@ -18,15 +18,17 @@ export const Route = createFileRoute("/user/change-password")({
 
 function ChangePasswordPage() {
   const login = Route.useLoaderData()
+  const navigate = Route.useNavigate()
 
   const changePasswordMut = useMutation(() => ({
-    mutationFn: (formData: FormData) => {
+    mutationFn: async (formData: FormData) => {
       const parseResult = ChangePasswordZ.parse({
         username: (formData.get("username") ?? undefined) as string,
         oldPassword: (formData.get("old_password") ?? undefined) as string,
         newPassword: (formData.get("new_password") ?? undefined) as string,
       })
-      return appApiClient.users.changePassword({ body: parseResult })
+      await appApiClient.users.changePassword({ body: parseResult })
+      navigate({ to: "/" })
     },
   }))
 
@@ -38,6 +40,7 @@ function ChangePasswordPage() {
           e.preventDefault()
 
           const formData = new FormData(e.currentTarget)
+          formData.set("username", login().login.user.username)
           changePasswordMut.mutate(formData)
         }}
       >
@@ -68,6 +71,7 @@ function ChangePasswordPage() {
         >
           Change Password
         </Button>
+        <div>{changePasswordMut.error?.toString()}</div>
       </form>
     </main>
   )
