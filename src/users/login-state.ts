@@ -16,7 +16,7 @@ export const fetchLoginState = async (): Promise<AuthStatusResult> => {
 
   const res = await appApiClient.users.queryLoginStatus()
   if (res.status === 200) {
-    return res.body.data
+    return res.body
   }
   return { loggedIn: false }
 }

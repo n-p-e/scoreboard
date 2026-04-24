@@ -1,16 +1,22 @@
 import tailwindcss from "@tailwindcss/vite"
 import { tanstackStart } from "@tanstack/solid-start/plugin/vite"
+import { nitro } from "nitro/vite"
 import { defineConfig } from "vite"
-import viteSolid from "vite-plugin-solid"
+import solidPlugin from "vite-plugin-solid"
 
 export default defineConfig({
   server: {
     port: 3000,
   },
-  plugins: [tanstackStart(), viteSolid({ ssr: true }), tailwindcss()],
+  plugins: [
+    nitro(),
+    tailwindcss(),
+    tanstackStart(),
+    solidPlugin({ ssr: true }),
+  ],
   build: {
     target: "es2022",
-    minify: !import.meta.env.BUILD_DISABLE_MINIFY,
+    minify: !process.env.BUILD_DISABLE_MINIFY,
   },
   resolve: {
     tsconfigPaths: true,
