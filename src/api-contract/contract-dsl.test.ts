@@ -29,7 +29,7 @@ describe("Zod Contract Client", () => {
       fetcher: mockFetch as any,
     })
 
-    await client.articles.submit({ body: { title: "Hello" } })
+    const _ = await client.articles.submit({ body: { title: "Hello" } })
 
     // Verify path: baseUrl + rootPrefix + subPrefix + routePath
     expect(mockFetch).toHaveBeenCalledWith(
@@ -91,7 +91,7 @@ describe("Zod Contract Client", () => {
       fetcher: mockFetch as any,
     })
 
-    const result = await client.ping({ body: undefined })
+    const result = await client.ping({})
 
     expect(mockFetch).toHaveBeenCalledWith(
       "https://test.com/api/ping",
