@@ -16,7 +16,7 @@
     "@fontsource-variable/newsreader": "^5.2.10",
     "@hono/zod-validator": "^0.7.6",
     "@kobalte/core": "^0.13.11",
-    "@rsbuild/core": "^2.0.0",
+    "@rsbuild/core": "^2.0.1",
     "@tanstack/solid-router": "^1.168.20",
     "@tanstack/solid-router-devtools": "^1.166.13",
     "@tanstack/solid-start": "^1.167.38",
