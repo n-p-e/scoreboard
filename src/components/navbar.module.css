@@ -38,6 +38,7 @@
   line-height: var(--text-base--line-height);
   color: var(--color-gray-200);
   padding: calc(var(--spacing) * 2);
+  cursor: default;
   user-select: none;
   outline: none;
 }

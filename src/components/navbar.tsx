@@ -1,5 +1,5 @@
 import { Popover } from "@ark-ui/solid/popover"
-import { useNavigate } from "@tanstack/solid-router"
+import { useMatch, useNavigate } from "@tanstack/solid-router"
 import { RiSystemMenuLine } from "solid-icons/ri"
 import { ParentProps, Show } from "solid-js"
 import { appApiClient } from "~/api-contract/client"
@@ -64,6 +64,9 @@ export const Dropdown = () => {
             >
               All Leagues
             </button>
+
+            <StatsLink />
+
             <button
               type="button"
               class={style.dropdownItem}
@@ -75,12 +78,6 @@ export const Dropdown = () => {
             >
               Log out
             </button>
-            {/* <NavbarLink
-              to={`/t/$league/summary`}
-              params={{ league: params().league }}
-            >
-              Summary
-            </NavbarLink> */}
           </Show>
           <Show when={!loginState()?.loggedIn}>
             <button
@@ -101,5 +98,27 @@ export const Dropdown = () => {
         </Popover.Content>
       </Popover.Positioner>
     </Popover.Root>
+  )
+}
+
+const StatsLink = () => {
+  const match = useMatch({
+    from: "/t/$league",
+    shouldThrow: false,
+  })
+
+  return (
+    <Show when={match()}>
+      {(match) => (
+        <Link
+          type="button"
+          to="/t/$league/stats"
+          class={style.dropdownItem}
+          params={{ league: match().params.league }}
+        >
+          Stats
+        </Link>
+      )}
+    </Show>
   )
 }
