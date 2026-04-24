@@ -5,9 +5,9 @@ import {
   desc,
   eq,
   gte,
-  lt,
   type InferSelectModel,
   isNull,
+  lt,
 } from "drizzle-orm"
 import { db } from "~/db/connection"
 import { leaguesTable, standingsTable } from "~/db/schema"

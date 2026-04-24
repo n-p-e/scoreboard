@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/solid-query"
+import { useMutation } from "@tanstack/solid-query"
 import { createFileRoute, redirect } from "@tanstack/solid-router"
 import { appApiClient } from "~/api-contract/client"
 import { Button } from "~/components/button"

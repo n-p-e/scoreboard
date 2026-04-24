@@ -11,7 +11,7 @@
       "!src/routeTree.gen.ts",
       // Exclude drizzle generated files
       "!drizzle/meta/*.json",
-      "!dist/**"
+      "!dist"
     ],
     "ignoreUnknown": false
   },

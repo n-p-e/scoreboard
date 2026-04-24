@@ -1,6 +1,5 @@
 import {
   createFileRoute,
-  Link,
   Outlet,
   useMatch,
   useNavigate,

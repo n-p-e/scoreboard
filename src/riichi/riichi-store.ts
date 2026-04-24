@@ -46,7 +46,8 @@ export async function submitRiichi(params: MatchResultSubmission) {
   const standings = orderStandingsByRawPoints(
     calculateMatchStandings(params.matchResult).map((item, index) => ({
       ...item,
-      finalScore: params.matchResult[index].adjustedFinalScore ?? item.finalScore,
+      finalScore:
+        params.matchResult[index].adjustedFinalScore ?? item.finalScore,
       nameLower: item.name.toLowerCase(),
     }))
   )

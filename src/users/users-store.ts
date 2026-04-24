@@ -8,6 +8,7 @@ import { db, type Transaction } from "~/db/connection"
 import { rolesTable, usersTable } from "~/db/schema"
 import { serverEnv } from "~/env.server"
 import { HttpStatusError } from "~/error/http-error"
+import { getLogger } from "~/logger"
 import {
   type AuthStatusResult,
   type AuthToken,
@@ -19,7 +20,6 @@ import {
   UserZ,
 } from "~/users/users-schema"
 import { uuidCompactToNormal } from "~/utils/schema-util"
-import { getLogger } from "~/logger"
 
 const logger = getLogger("users-store")
 

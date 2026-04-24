@@ -69,7 +69,9 @@ function SummaryPageContent() {
     <main class="max-w-md w-full mx-auto pt-2 px-2">
       <div class="px-2 pb-4">
         <h1 class="text-lg inline-flex space-x-2">
-          <span class="bg-gray-300 text-black py-1 px-2 font-semibold">Stats</span>
+          <span class="bg-gray-300 text-black py-1 px-2 font-semibold">
+            Stats
+          </span>
           <span class="font-normal p-1">
             {data().league?.displayName ?? ""}
           </span>
