@@ -1,7 +1,17 @@
-import { createFileRoute, Outlet } from "@tanstack/solid-router"
-import { Suspense } from "solid-js"
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useMatch,
+  useNavigate,
+} from "@tanstack/solid-router"
+import { Show, Suspense } from "solid-js"
 import { Loading } from "~/components/loading"
-import { NavbarContainer, NavbarLink } from "~/components/navbar"
+import {
+  DropdownButton,
+  NavbarContainer,
+  NavbarLink,
+} from "~/components/navbar"
 
 export const Route = createFileRoute("/t/$league")({
   component: Layout,
@@ -12,7 +22,7 @@ function Layout() {
 
   return (
     <div class="flex flex-col min-h-screen">
-      <NavbarContainer>
+      <NavbarContainer dropdownItems={<StatsLink />}>
         <NavbarLink
           to={`/t/$league/matches`}
           params={{ league: params().league }}
@@ -37,5 +47,30 @@ function Layout() {
         <Outlet />
       </Suspense>
     </div>
+  )
+}
+
+const StatsLink = () => {
+  const navigate = useNavigate()
+  const match = useMatch({
+    from: "/t/$league",
+    shouldThrow: false,
+  })
+
+  return (
+    <Show when={match()}>
+      {(match) => (
+        <DropdownButton
+          onClick={() =>
+            navigate({
+              to: "/t/$league/stats",
+              params: { league: match().params.league },
+            })
+          }
+        >
+          Stats
+        </DropdownButton>
+      )}
+    </Show>
   )
 }

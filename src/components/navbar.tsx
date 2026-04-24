@@ -1,13 +1,17 @@
 import { Popover } from "@ark-ui/solid/popover"
-import { useMatch, useNavigate } from "@tanstack/solid-router"
+import { useNavigate } from "@tanstack/solid-router"
 import { RiSystemMenuLine } from "solid-icons/ri"
-import { ParentProps, Show } from "solid-js"
+import { ComponentProps, JSXElement, ParentProps, Show } from "solid-js"
 import { appApiClient } from "~/api-contract/client"
 import { Link } from "~/components/Link"
 import { queryLoginState } from "~/users/login-state"
 import style from "./navbar.module.css"
 
-export const NavbarContainer = (props: ParentProps) => {
+export const NavbarContainer = (
+  props: ParentProps<{
+    dropdownItems?: JSXElement
+  }>
+) => {
   return (
     <nav class="flex flex-row items-center justify-center h-10 xs:h-12 bg-slate-900 text-sm xs:text-base text-gray-200">
       <div class="flex-1"> </div>
@@ -15,7 +19,7 @@ export const NavbarContainer = (props: ParentProps) => {
         {props.children}
       </div>
       <div class="flex-1 flex justify-end">
-        <Dropdown />
+        <Dropdown>{props.dropdownItems}</Dropdown>
       </div>
     </nav>
   )
@@ -31,7 +35,7 @@ export const NavbarLink: typeof Link = (props) => {
   )
 }
 
-export const Dropdown = () => {
+export const Dropdown = (props: ParentProps) => {
   const navigate = useNavigate()
   const [loginState] = queryLoginState()
 
@@ -55,7 +59,7 @@ export const Dropdown = () => {
                 return ""
               })()}
             </div>
-            <button
+            <Popover.CloseTrigger
               type="button"
               class={style.dropdownItem}
               onClick={() => {
@@ -63,11 +67,11 @@ export const Dropdown = () => {
               }}
             >
               All Leagues
-            </button>
+            </Popover.CloseTrigger>
 
-            <StatsLink />
+            {props.children}
 
-            <button
+            <Popover.CloseTrigger
               type="button"
               class={style.dropdownItem}
               onClick={() => {
@@ -75,8 +79,8 @@ export const Dropdown = () => {
               }}
             >
               Change password
-            </button>
-            <button
+            </Popover.CloseTrigger>
+            <Popover.CloseTrigger
               type="button"
               class={style.dropdownItem}
               onClick={() => {
@@ -86,10 +90,10 @@ export const Dropdown = () => {
               }}
             >
               Log out
-            </button>
+            </Popover.CloseTrigger>
           </Show>
           <Show when={!loginState()?.loggedIn}>
-            <button
+            <Popover.CloseTrigger
               type="button"
               class={style.dropdownItem}
               onClick={() => {
@@ -102,7 +106,7 @@ export const Dropdown = () => {
               }}
             >
               Log in
-            </button>
+            </Popover.CloseTrigger>
           </Show>
         </Popover.Content>
       </Popover.Positioner>
@@ -110,24 +114,12 @@ export const Dropdown = () => {
   )
 }
 
-const StatsLink = () => {
-  const match = useMatch({
-    from: "/t/$league",
-    shouldThrow: false,
-  })
-
+export const DropdownButton = (props: ComponentProps<"button">) => {
   return (
-    <Show when={match()}>
-      {(match) => (
-        <Link
-          type="button"
-          to="/t/$league/stats"
-          class={style.dropdownItem}
-          params={{ league: match().params.league }}
-        >
-          Stats
-        </Link>
-      )}
-    </Show>
+    <Popover.CloseTrigger
+      type="button"
+      {...props}
+      class={`${style.dropdownItem} ${props.class ?? ""}`}
+    />
   )
 }
