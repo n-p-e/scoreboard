@@ -42,6 +42,10 @@ export const riichiContract = createContract({ prefix: "/riichi" }).routes({
   }),
 
   updateMatch: endpoint.put("/leagues/:league/match/:match", {
+    pathParams: z.object({
+      league: z.string(),
+      match: z.string(),
+    }),
     reqBody: z.object({ data: StandingsItemZ }),
     resBody: z.object({ data: StandingsItemZ }),
   }),
@@ -63,6 +67,9 @@ export const riichiContract = createContract({ prefix: "/riichi" }).routes({
   }),
 
   listLeaderboard: endpoint.get("/leaderboard/:leagueId", {
+    pathParams: z.object({
+      leagueId: z.string(),
+    }),
     resBody: z.object({ data: LeaderboardResultZ }),
   }),
 
@@ -72,11 +79,19 @@ export const riichiContract = createContract({ prefix: "/riichi" }).routes({
   }),
 
   patchStandings: endpoint.patch("/leagues/:leagueId/match/:matchId", {
+    pathParams: z.object({
+      leagueId: z.string(),
+      matchId: z.string(),
+    }),
     reqBody: z.object({ confirmed: z.boolean() }),
     resBody: z.object({ status: z.literal("success") }),
   }),
 
   deleteStandings: endpoint.delete("/leagues/:leagueId/match/:matchId", {
+    pathParams: z.object({
+      leagueId: z.string(),
+      matchId: z.string(),
+    }),
     resBody: z.object({ status: z.literal("success") }),
   }),
 })
