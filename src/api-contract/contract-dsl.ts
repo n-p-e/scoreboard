@@ -1,7 +1,10 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: for type gymnastics */
 import * as z from "zod/mini"
 
-type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+export type Fetcher = (
+  ...args: Parameters<typeof fetch>
+) => ReturnType<typeof fetch>
+export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 type ZodType = z.ZodMiniType
 type Simplify<T> = { [K in keyof T]: T[K] } & {}
@@ -197,7 +200,7 @@ export function createClient<T extends Contract>({
 }: {
   contract: T
   baseUrl: string
-  fetcher?: typeof fetch
+  fetcher?: Fetcher
 }): Client<T> {
   // Helper to create the proxy recursively
   function createRecursiveProxy<TCurrent extends Contract>(
