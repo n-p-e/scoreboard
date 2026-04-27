@@ -238,7 +238,7 @@ const FormRow = (props: {
         </div>
         <input
           name={`score_player_${props.index}`}
-          class="w-24 grow-0 shrink text-lg border-1 px-2 border-gray-700 text-center placeholder-gray-600"
+          class="w-24 grow-0 shrink text-lg border px-2 border-gray-700 text-center placeholder-gray-600"
           value={points()}
           onInput={(e) => {
             const input = e.target.value
@@ -266,7 +266,7 @@ const FormRow = (props: {
             <div class="inline-flex flex-initial items-center w-24 text-nowrap text-center">
               <input
                 name={`adjusted_final_score_player_${props.index}`}
-                class="text-lg border-1 px-2 border-gray-700 w-full text-center placeholder-gray-600"
+                class="text-lg border px-2 border-gray-700 w-full text-center placeholder-gray-600"
                 value={finalScore()}
                 onChange={(e) => setFinalScore(e.target.value)}
                 autocomplete="off"
@@ -341,7 +341,7 @@ const PlayerNameInput = (props: {
       <Combobox.Control>
         <Combobox.Input
           name={props.name}
-          class="text-lg border-1 px-2 border-gray-700 w-full placeholder-gray-600"
+          class="text-lg border px-2 border-gray-700 w-full placeholder-gray-600"
           placeholder="Player"
           autocomplete="off"
         />
