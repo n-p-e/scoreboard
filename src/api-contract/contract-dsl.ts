@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: for type gymnastics */
-/** biome-ignore-all lint/complexity/noBannedTypes: for type gymnastics */
 import * as z from "zod/mini"
 import { AppErrorInfo } from "~/error/app-error"
 import { HttpStatusError } from "~/error/http-error"
@@ -7,12 +5,19 @@ import { HttpStatusError } from "~/error/http-error"
 export type Fetcher = (
   ...args: Parameters<typeof fetch>
 ) => ReturnType<typeof fetch>
+
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 type ZodType = z.ZodMiniType
-type Simplify<T> = { [K in keyof T]: T[K] } & {}
 
-type RouteDef<
+/**
+ * Prettify: Flattens intersections for better IDE tooltips.
+ */
+type Prettify<T> = {
+  [K in keyof T]: T[K]
+} & Record<never, never>
+
+export type RouteDef<
   PathParams extends ZodType | undefined = undefined,
   QueryParams extends ZodType | undefined = undefined,
   ReqBody extends ZodType | undefined = undefined,
@@ -26,14 +31,17 @@ type RouteDef<
   resBody: ResBody
 }
 
-type AnyRouteDef = RouteDef<
+export type AnyRouteDef = RouteDef<
   ZodType | undefined,
   ZodType | undefined,
   ZodType | undefined,
   ZodType
 >
 
-interface Contract<Definitions = any> {
+/**
+ * We constrain Definitions to ensure it only contains Routes or sub-Contracts.
+ */
+export interface Contract<Definitions = Record<string, AnyRouteDef | unknown>> {
   prefix: string
   definitions: Definitions
 }
@@ -43,116 +51,62 @@ type ClientResponse<ResBody extends ZodType> = Promise<{
   body: z.output<ResBody>
 }>
 
+/**
+ * Maps Zod schemas to a unified Input type.
+ */
 type RouteArgs<
   PathParams extends ZodType | undefined,
   QueryParams extends ZodType | undefined,
   ReqBody extends ZodType | undefined,
-> = keyof Simplify<
-  ([PathParams] extends [ZodType] ? { params: z.input<PathParams> } : {}) &
-    ([QueryParams] extends [ZodType] ? { query: z.input<QueryParams> } : {}) &
-    ([ReqBody] extends [ZodType] ? { body: z.input<ReqBody> } : {})
-> extends never
-  ? undefined
-  : Simplify<
-      ([PathParams] extends [ZodType] ? { params: z.input<PathParams> } : {}) &
-        ([QueryParams] extends [ZodType]
-          ? { query: z.input<QueryParams> }
-          : {}) &
-        ([ReqBody] extends [ZodType] ? { body: z.input<ReqBody> } : {})
-    >
+> = Prettify<
+  ([PathParams] extends [ZodType]
+    ? { params: z.input<PathParams> }
+    : Record<never, never>) &
+    ([QueryParams] extends [ZodType]
+      ? { query: z.input<QueryParams> }
+      : Record<never, never>) &
+    ([ReqBody] extends [ZodType]
+      ? { body: z.input<ReqBody> }
+      : Record<never, never>)
+>
 
-// Utility to define routes
+/**
+ * Determines if a route requires an arguments object or not.
+ */
+type IsEmpty<T> = keyof T extends never ? true : false
+
+// --- Endpoint Builder ---
+
+const createEndpoint =
+  (method: Method) =>
+  <
+    Res extends ZodType,
+    Req extends ZodType | undefined = undefined,
+    Params extends ZodType | undefined = undefined,
+    Query extends ZodType | undefined = undefined,
+  >(
+    path: string,
+    schemas: {
+      pathParams?: Params
+      queryParams?: Query
+      reqBody?: Req
+      resBody: Res
+    }
+  ): RouteDef<Params, Query, Req, Res> => ({
+    method,
+    path,
+    pathParams: schemas.pathParams as Params,
+    queryParams: schemas.queryParams as Query,
+    reqBody: schemas.reqBody as Req,
+    resBody: schemas.resBody,
+  })
+
 export const endpoint = {
-  get: <
-    Res extends ZodType,
-    Params extends ZodType | undefined = undefined,
-    Query extends ZodType | undefined = undefined,
-  >(
-    path: string,
-    schemas: { pathParams?: Params; queryParams?: Query; resBody: Res }
-  ): RouteDef<Params, Query, undefined, Res> => ({
-    method: "GET",
-    path,
-    pathParams: schemas.pathParams as Params,
-    queryParams: schemas.queryParams as Query,
-    ...schemas,
-    reqBody: undefined,
-  }),
-  post: <
-    Req extends ZodType,
-    Res extends ZodType,
-    Params extends ZodType | undefined = undefined,
-    Query extends ZodType | undefined = undefined,
-  >(
-    path: string,
-    schemas: {
-      pathParams?: Params
-      queryParams?: Query
-      reqBody: Req
-      resBody: Res
-    }
-  ): RouteDef<Params, Query, Req, Res> => ({
-    method: "POST",
-    path,
-    pathParams: schemas.pathParams as Params,
-    queryParams: schemas.queryParams as Query,
-    ...schemas,
-  }),
-  put: <
-    Req extends ZodType,
-    Res extends ZodType,
-    Params extends ZodType | undefined = undefined,
-    Query extends ZodType | undefined = undefined,
-  >(
-    path: string,
-    schemas: {
-      pathParams?: Params
-      queryParams?: Query
-      reqBody: Req
-      resBody: Res
-    }
-  ): RouteDef<Params, Query, Req, Res> => ({
-    method: "PUT",
-    path,
-    pathParams: schemas.pathParams as Params,
-    queryParams: schemas.queryParams as Query,
-    ...schemas,
-  }),
-  patch: <
-    Req extends ZodType,
-    Res extends ZodType,
-    Params extends ZodType | undefined = undefined,
-    Query extends ZodType | undefined = undefined,
-  >(
-    path: string,
-    schemas: {
-      pathParams?: Params
-      queryParams?: Query
-      reqBody: Req
-      resBody: Res
-    }
-  ): RouteDef<Params, Query, Req, Res> => ({
-    method: "PATCH",
-    path,
-    pathParams: schemas.pathParams as Params,
-    queryParams: schemas.queryParams as Query,
-    ...schemas,
-  }),
-  delete: <
-    Res extends ZodType,
-    Params extends ZodType | undefined = undefined,
-    Query extends ZodType | undefined = undefined,
-  >(
-    path: string,
-    schemas: { pathParams?: Params; queryParams?: Query; resBody: Res }
-  ): RouteDef<Params, Query, undefined, Res> => ({
-    method: "DELETE",
-    path,
-    pathParams: schemas.pathParams as Params,
-    queryParams: schemas.queryParams as Query,
-    reqBody: undefined,
-    ...schemas,
-  }),
+  get: createEndpoint("GET"),
+  post: createEndpoint("POST"),
+  put: createEndpoint("PUT"),
+  patch: createEndpoint("PATCH"),
+  delete: createEndpoint("DELETE"),
 }
 
 // --- Contract Builder ---
@@ -168,8 +122,7 @@ export const createContract = (options: { prefix: string }) => {
   }
 }
 
-// --- Client Factory ---
-// --- Recursive Client Type ---
+// --- Client Types ---
 
 interface CommonClientArgs {
   fetchOptions?: RequestInit
@@ -179,17 +132,16 @@ type Client<T> =
   T extends Contract<infer D>
     ? {
         [K in keyof D]: D[K] extends RouteDef<
-          infer PathParams,
-          infer QueryParams,
-          infer ReqBody,
-          infer ResBody
+          infer P,
+          infer Q,
+          infer B,
+          infer Res
         >
-          ? RouteArgs<PathParams, QueryParams, ReqBody> extends undefined
-            ? (args?: CommonClientArgs) => ClientResponse<ResBody>
+          ? IsEmpty<RouteArgs<P, Q, B>> extends true
+            ? (args?: CommonClientArgs) => ClientResponse<Res>
             : (
-                args: CommonClientArgs &
-                  RouteArgs<PathParams, QueryParams, ReqBody>
-              ) => ClientResponse<ResBody>
+                args: CommonClientArgs & RouteArgs<P, Q, B>
+              ) => ClientResponse<Res>
           : Client<D[K]>
       }
     : never
@@ -205,90 +157,82 @@ export function createClient<T extends Contract>({
   baseUrl: string
   fetcher?: Fetcher
 }): Client<T> {
-  // Helper to create the proxy recursively
-  function createRecursiveProxy<TCurrent extends Contract>(
-    currentContract: TCurrent,
+  function createRecursiveProxy(
+    currentContract: Contract,
     currentPath: string
-  ): Client<TCurrent> {
-    return new Proxy({} as Client<TCurrent>, {
-      get(_, prop: string) {
-        const item = currentContract.definitions[prop]
-        if (!item) throw new Error(`Property ${prop} not found in contract`)
+  ): unknown {
+    return new Proxy(
+      {},
+      {
+        get(_, prop: string) {
+          const item = currentContract.definitions[prop] as
+            | AnyRouteDef
+            | Contract
+            | undefined
+          if (!item) throw new Error(`Property ${prop} not found in contract`)
 
-        // Calculate the new path (base + parent prefixes + current item prefix/path)
-        const newPath = `${currentPath}${currentContract.prefix}`
+          const newPath = `${currentPath}${currentContract.prefix}`
 
-        // If it's a sub-contract, return a new proxy for the next level
-        if ("definitions" in item) {
-          return createRecursiveProxy(item, newPath)
-        }
+          if ("definitions" in item) {
+            return createRecursiveProxy(item as Contract, newPath)
+          }
 
-        // If it's a route, return the execution function
-        const route = item as RouteDef<
-          ZodType | undefined,
-          ZodType | undefined,
-          ZodType | undefined,
-          ZodType
-        >
-        return async (args?: {
-          params?: unknown
-          query?: unknown
-          body?: unknown
-          fetchOptions?: RequestInit
-        }) => {
-          const body = args?.body
-          const params = route.pathParams?.parse(args?.params)
-          const query = route.queryParams?.parse(args?.query)
-          const finalPath = interpolatePath(route.path, params)
-          const finalUrl = appendQueryString(
-            `${baseUrl.replace(/\/$/, "")}${newPath}${finalPath}`,
-            query
-          )
-
-          // parse the req body through zod here
-          const parsedReqBody = route.reqBody?.parse(body)
-
-          const response = await fetcher(finalUrl, {
-            method: route.method,
-            headers: { "Content-Type": "application/json" },
-            body:
-              route.method !== "GET"
-                ? JSON.stringify(parsedReqBody)
-                : undefined,
-            ...args?.fetchOptions,
-          })
-
-          if (!response.ok) {
-            // Attempt to parse structured error JSON from the backend
-            let errorData: AppErrorInfo
-
-            try {
-              errorData = await response.json()
-            } catch (_e) {
-              // Fallback if the body isn't JSON or is empty
-              errorData = {
-                tag: "parse-error",
-                message: response.statusText || "Unexpected response format",
-              }
-            }
-            throw new HttpStatusError(
-              response.status,
-              String(errorData.message ?? "unknown error"),
-              errorData
+          const route = item
+          return async (args?: {
+            params?: unknown
+            query?: unknown
+            body?: unknown
+            fetchOptions?: RequestInit
+          }) => {
+            const params = route.pathParams?.parse(args?.params)
+            const query = route.queryParams?.parse(args?.query)
+            const finalPath = interpolatePath(route.path, params)
+            const finalUrl = appendQueryString(
+              `${baseUrl.replace(/\/$/, "")}${newPath}${finalPath}`,
+              query
             )
-          }
 
-          const json = await response.json()
-          return {
-            status: response.status,
-            body: route.resBody.parse(json),
+            const parsedReqBody = route.reqBody?.parse(args?.body)
+
+            const response = await fetcher(finalUrl, {
+              method: route.method,
+              headers: { "Content-Type": "application/json" },
+              body:
+                route.method !== "GET"
+                  ? JSON.stringify(parsedReqBody)
+                  : undefined,
+              ...args?.fetchOptions,
+            })
+
+            if (!response.ok) {
+              let errorData: AppErrorInfo
+              try {
+                errorData = await response.json()
+              } catch {
+                errorData = {
+                  tag: "parse-error",
+                  message: response.statusText || "Unexpected response format",
+                }
+              }
+              throw new HttpStatusError(
+                response.status,
+                String(errorData.message ?? "unknown error"),
+                errorData
+              )
+            }
+
+            const json = await response.json()
+            return {
+              status: response.status,
+              body: route.resBody.parse(json),
+            }
           }
-        }
-      },
-    })
+        },
+      }
+    )
   }
 
-  return createRecursiveProxy(contract, "")
+  return createRecursiveProxy(contract, "") as Client<T>
 }
 
 function interpolatePath(path: string, params: unknown) {
@@ -304,7 +248,7 @@ function interpolatePath(path: string, params: unknown) {
 
 function appendQueryString(url: string, query: unknown) {
   const queryParams = query as Record<string, unknown> | undefined
-  if (queryParams == null) return url
+  if (!queryParams) return url
 
   const searchParams = new URLSearchParams()
   for (const [key, value] of Object.entries(queryParams)) {
@@ -316,6 +260,5 @@ function appendQueryString(url: string, query: unknown) {
   }
 
   const queryString = searchParams.toString()
-  if (queryString.length === 0) return url
-  return `${url}?${queryString}`
+  return queryString ? `${url}?${queryString}` : url
 }
