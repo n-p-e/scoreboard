@@ -50,7 +50,7 @@ describe("calculateUmaPoints()", () => {
     ])
   })
 
-  test("in other order", () => {
+  test("retains original order", () => {
     const result = calculateMatchStandings(scoresInput([240, 350, 250, 160]))
     expect(result).toStrictEqual([
       {
