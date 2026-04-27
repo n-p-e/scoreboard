@@ -9,7 +9,6 @@ export default defineConfig({
     port: 3000,
   },
   plugins: [
-    // nitro(),
     tailwindcss(),
     tanstackStart(),
     nitro(),
@@ -18,7 +17,7 @@ export default defineConfig({
   build: {
     target: "es2022",
     minify: !process.env.BUILD_DISABLE_MINIFY,
-    sourcemap: true,
+    sourcemap: !process.env.BUILD_DISABLE_SOURCEMAP,
   },
   resolve: {
     tsconfigPaths: true,
