@@ -18,6 +18,7 @@ export default defineConfig({
   build: {
     target: "es2022",
     minify: !process.env.BUILD_DISABLE_MINIFY,
+    sourcemap: true,
   },
   resolve: {
     tsconfigPaths: true,
