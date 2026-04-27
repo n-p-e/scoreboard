@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: for type gymnastics */
+/** biome-ignore-all lint/complexity/noBannedTypes: for type gymnastics */
 import * as z from "zod/mini"
 import { AppErrorInfo } from "~/error/app-error"
 import { HttpStatusError } from "~/error/http-error"
