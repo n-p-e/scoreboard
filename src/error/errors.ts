@@ -1,6 +1,6 @@
 import { HttpStatusError } from "~/error/http-error"
 
-export function permissionDenied() {
+export function permissionDenied(): never {
   throw new HttpStatusError(
     400,
     "You do not have permission for this operation",

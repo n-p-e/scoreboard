@@ -29,6 +29,7 @@ import type {
 } from "~/riichi/riichi-schema"
 import { calculateMatchStandings } from "~/riichi/scores"
 import type { AuthStatusResult } from "~/users/users-schema"
+import { recordHistoryItem } from "~/history/history-store"
 
 const logger = getLogger("riichi-store")
 
@@ -259,25 +260,49 @@ export async function patchStanding(params: {
   if (!params.auth.loggedIn || !params.auth.roles.includes("admin")) {
     permissionDenied()
   }
+  const uid = params.auth.user.uid
 
-  const updateRes = await db
-    .update(standingsTable)
-    .set({
-      confirmed_at: (() => {
-        if (params.patchArgs.confirmed) return new Date()
-        return null
-      })(),
-    })
-    .where(
-      and(
-        eq(standingsTable.league_id, params.leagueId),
-        eq(standingsTable.id, parseInt(params.matchId, 10))
+  return await db.transaction(async (tx) => {
+    const before = await tx
+      .select()
+      .from(standingsTable)
+      .where(
+        and(
+          eq(standingsTable.league_id, params.leagueId),
+          eq(standingsTable.id, parseInt(params.matchId, 10))
+        )
       )
-    )
-  if ((updateRes.rowCount ?? 0) > 0) {
-    return
-  }
-  throw new HttpStatusError(400, "Could not update standing")
+
+    const updateRes = await tx
+      .update(standingsTable)
+      .set({
+        confirmed_at: (() => {
+          if (params.patchArgs.confirmed) return new Date()
+          return null
+        })(),
+      })
+      .where(
+        and(
+          eq(standingsTable.league_id, params.leagueId),
+          eq(standingsTable.id, parseInt(params.matchId, 10))
+        )
+      )
+      .returning()
+    if ((updateRes.length ?? 0) > 0) {
+      await recordHistoryItem(tx, {
+        record: {
+          action: "updateMatchRecord",
+          before: toStandingsItem(before[0]),
+          after: toStandingsItem(updateRes[0]),
+        },
+        sourceUser: uid,
+      })
+
+      return updateRes
+    }
+
+    throw new HttpStatusError(400, "Could not update standing")
+  })
 }
 
 export async function deleteStanding(params: {

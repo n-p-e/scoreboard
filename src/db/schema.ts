@@ -117,3 +117,13 @@ export const playersTable = pgTable(
     ),
   ]
 )
+
+export const historyTable = pgTable("ops_history", {
+  id: uuid()
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
+  source_user: uuid().references(() => usersTable.id),
+  action: varchar().notNull(),
+  data: jsonb().notNull().default("{}"),
+  ...createdUpdatedAtCols(),
+})
