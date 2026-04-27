@@ -280,6 +280,10 @@ const FormRow = (props: {
 }
 
 const playerNamesQuery = async (searchTerm: string) => {
+  if (searchTerm.length === 0) {
+    return []
+  }
+
   const res = await appApiClient.riichi.listPlayers({
     query: {
       search: searchTerm,
