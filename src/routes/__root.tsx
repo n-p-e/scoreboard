@@ -1,12 +1,11 @@
 /// <reference types="vite/client" />
-import { QueryClient, QueryClientProvider } from "@tanstack/solid-query"
+import { QueryClient } from "@tanstack/solid-query"
 import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
 import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
-  useRouter,
 } from "@tanstack/solid-router"
 import { TanStackRouterDevtools } from "@tanstack/solid-router-devtools"
 import * as Solid from "solid-js"
@@ -63,14 +62,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 )
 
 function RootComponent() {
-  const router = useRouter()
-
-  // Workaround: using nitro server seems to break automatic client install in router.ts
   return (
     <RootDocument>
-      <QueryClientProvider client={router.options.context.queryClient}>
-        <Outlet />
-      </QueryClientProvider>
+      <Outlet />
     </RootDocument>
   )
 }

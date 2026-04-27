@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     tanstackStart(),
-    nitro(),
+    nitro({ preset: "bun" }),
     solidPlugin({ ssr: true }),
   ],
   build: {
