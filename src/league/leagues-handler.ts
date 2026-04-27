@@ -1,9 +1,9 @@
-import { zValidator } from "@hono/zod-validator"
 import { Hono } from "hono"
 import * as z from "zod/mini"
 import { listLeagues, queryLeagueStats } from "~/league/league-store"
 import { requiresAdminPrivilege } from "~/server/auth-middleware"
 import { HonoEnv } from "~/server/server-types"
+import { paramValidator, queryValidator } from "~/server/validator"
 
 export const leaguesHandler = new Hono<HonoEnv>()
   .get("/leagues", requiresAdminPrivilege, async (c) => {
@@ -14,14 +14,12 @@ export const leaguesHandler = new Hono<HonoEnv>()
   .get(
     "/leagues/:leagueId/stats",
     // requiresAdminPrivilege,
-    zValidator(
-      "param",
+    paramValidator(
       z.object({
         leagueId: z.string(),
       })
     ),
-    zValidator(
-      "query",
+    queryValidator(
       z.object({
         period: z.optional(z.enum(["day", "week"])),
         timezone: z.optional(z.string()),

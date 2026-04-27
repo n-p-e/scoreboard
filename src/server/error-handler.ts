@@ -1,6 +1,6 @@
 import { ErrorHandler, NotFoundHandler } from "hono"
 import { ContentfulStatusCode } from "hono/utils/http-status"
-import { ZodError } from "zod"
+import * as zod from "zod"
 import { AppError } from "~/error/app-error"
 import { HttpStatusError } from "~/error/http-error"
 import { getLogger } from "~/logger"
@@ -36,7 +36,7 @@ export const backendErrorHandler: ErrorHandler = (err, c) => {
   }
 
   // Handle Validation Errors (Zod)
-  if (err instanceof ZodError) {
+  if (err instanceof zod.core.$ZodError) {
     return c.json(
       {
         tag: "invalid-request",

@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator"
 import { Hono } from "hono"
 import * as z from "zod/mini"
 import {
@@ -13,6 +12,11 @@ import {
 import { HonoEnv } from "~/server/server-types"
 import { integerRange } from "~/utils/schema-util"
 import { StandingsItemZ, SubmitMatchResultRequestZ } from "./riichi-schema"
+import {
+  paramValidator,
+  queryValidator,
+  jsonValidator,
+} from "~/server/validator"
 
 const listMatchesQuerySchema = z.object({
   matchId: z.optional(z.string()),
@@ -43,7 +47,7 @@ const patchStandingsBodySchema = z.object({
 export const riichiHandler = new Hono<HonoEnv>()
   .get(
     "/leagues/:league/match",
-    zValidator("query", listMatchesQuerySchema),
+    queryValidator(listMatchesQuerySchema),
     async (c) => {
       const query = c.req.valid("query")
       return c.json({
@@ -57,7 +61,7 @@ export const riichiHandler = new Hono<HonoEnv>()
   )
   .put(
     "/leagues/:league/match/:match",
-    zValidator("json", updateMatchBodySchema),
+    jsonValidator(updateMatchBodySchema),
     async (c) => {
       const body = c.req.valid("json")
       return c.json({
@@ -69,7 +73,7 @@ export const riichiHandler = new Hono<HonoEnv>()
       })
     }
   )
-  .get("/players", zValidator("query", listPlayersQuerySchema), async (c) => {
+  .get("/players", queryValidator(listPlayersQuerySchema), async (c) => {
     const query = c.req.valid("query")
     return c.json({
       data: {
@@ -82,8 +86,8 @@ export const riichiHandler = new Hono<HonoEnv>()
   })
   .get(
     "/leaderboard/:leagueId",
-    zValidator("param", listLeaderboardParamsSchema),
-    zValidator("query", listLeaderboardQuerySchema),
+    paramValidator(listLeaderboardParamsSchema),
+    queryValidator(listLeaderboardQuerySchema),
     async (c) => {
       const params = c.req.valid("param")
       const query = c.req.valid("query")
@@ -97,7 +101,7 @@ export const riichiHandler = new Hono<HonoEnv>()
   )
   .post(
     "/match-standing",
-    zValidator("json", SubmitMatchResultRequestZ),
+    jsonValidator(SubmitMatchResultRequestZ),
     async (c) => {
       const body = c.req.valid("json")
       await submitRiichi(body.data)
@@ -108,7 +112,7 @@ export const riichiHandler = new Hono<HonoEnv>()
   )
   .patch(
     "/leagues/:leagueId/match/:matchId",
-    zValidator("json", patchStandingsBodySchema),
+    jsonValidator(patchStandingsBodySchema),
     async (c) => {
       await patchStanding({
         ...c.req.param(),
