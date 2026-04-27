@@ -2,9 +2,22 @@
 
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-import { createClient, createContract, endpoint } from "./contract-dsl"
+import {
+  createClient,
+  createContract,
+  ErrorHandler,
+  endpoint,
+} from "./contract-dsl"
 
 describe("Zod Contract Client", () => {
+  const onError: ErrorHandler = (resp) => {
+    const err = new (class MockError extends Error {
+      resp: unknown
+    })()
+    err.resp = resp
+    throw err
+  }
+
   const articlesContract = createContract({ prefix: "/articles" }).routes({
     submit: endpoint.post("/submit", {
       reqBody: z.object({ title: z.string() }),
@@ -54,6 +67,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: mockFetch,
+      onError,
     })
 
     const result = await client.articles.submit({ body: { title: "Hello" } })
@@ -80,6 +94,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: mockFetch,
+      onError,
     })
 
     // Should throw ZodError because 'id' is missing in the response
@@ -99,6 +114,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: mockFetch,
+      onError,
     })
 
     const body = { title: "My New Article" }
@@ -123,6 +139,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: mockFetch,
+      onError,
     })
 
     const result = await client.ping()
@@ -148,6 +165,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: mockFetch,
+      onError,
     })
 
     const result = await client.profile({
@@ -175,6 +193,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: mockFetch,
+      onError,
     })
 
     const result = await client.articles.updateSeasonScore({
@@ -214,6 +233,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: mockFetch,
+      onError,
     })
 
     const result = await client.articles.search({
@@ -240,6 +260,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: vi.fn(),
+      onError,
     })
 
     await expect(
@@ -263,6 +284,7 @@ describe("Zod Contract Client", () => {
       contract: rootContract,
       baseUrl: "https://test.com",
       fetcher: vi.fn(),
+      onError,
     })
 
     await expect(

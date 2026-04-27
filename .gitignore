@@ -1,6 +1,6 @@
 .local
 node_modules
-/dist/
+dist/
 
 .nitro/
 .tanstack/

@@ -1,3 +1,4 @@
+import { createContract, endpoint } from "@nptr/contract-dsl"
 import * as z from "zod/mini"
 import { LeagueDataZ, LeagueStatsZ } from "~/league/league-schema"
 import {
@@ -11,7 +12,6 @@ import {
   UserLoginZ,
 } from "~/users/users-schema"
 import { integerRange } from "~/utils/schema-util"
-import { createContract, endpoint } from "./contract-dsl"
 
 // --- Users Contract ---
 export const usersContract = createContract({ prefix: "" }).routes({

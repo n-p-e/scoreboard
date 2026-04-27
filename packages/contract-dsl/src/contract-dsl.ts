@@ -1,6 +1,4 @@
 import * as z from "zod/mini"
-import { AppErrorInfo } from "~/error/app-error"
-import { HttpStatusError } from "~/error/http-error"
 
 export type Fetcher = (
   ...args: Parameters<typeof fetch>
@@ -46,7 +44,7 @@ export interface Contract<Definitions = Record<string, AnyRouteDef | unknown>> {
   definitions: Definitions
 }
 
-type ClientResponse<ResBody extends ZodType> = Promise<{
+export type ClientResponse<ResBody extends ZodType> = Promise<{
   status: number
   body: z.output<ResBody>
 }>
@@ -124,11 +122,11 @@ export const createContract = (options: { prefix: string }) => {
 
 // --- Client Types ---
 
-interface CommonClientArgs {
+export interface CommonClientArgs {
   fetchOptions?: RequestInit
 }
 
-type Client<T> =
+export type Client<T> =
   T extends Contract<infer D>
     ? {
         [K in keyof D]: D[K] extends RouteDef<
@@ -146,16 +144,20 @@ type Client<T> =
       }
     : never
 
+export type ErrorHandler = (response: Response) => never | Promise<never>
+
 // --- Client Factory ---
 
 export function createClient<T extends Contract>({
   contract,
   baseUrl,
+  onError,
   fetcher = fetch,
 }: {
   contract: T
   baseUrl: string
   fetcher?: Fetcher
+  onError: ErrorHandler
 }): Client<T> {
   function createRecursiveProxy(
     currentContract: Contract,
@@ -205,20 +207,8 @@ export function createClient<T extends Contract>({
             })
 
             if (!response.ok) {
-              let errorData: AppErrorInfo
-              try {
-                errorData = await response.json()
-              } catch {
-                errorData = {
-                  tag: "parse-error",
-                  message: response.statusText || "Unexpected response format",
-                }
-              }
-              throw new HttpStatusError(
-                response.status,
-                String(errorData.message ?? "unknown error"),
-                errorData
-              )
+              await onError(response)
+              throw Error("shouldn't reach here!")
             }
 
             const json = await response.json()

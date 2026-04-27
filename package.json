@@ -3,6 +3,9 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "bun x --bun vite dev",
     "build": "bun x --bun vite build && tsc --noEmit",
@@ -39,7 +42,8 @@
     "uuid25": "^0.1.6",
     "uuidv7": "^1.2.1",
     "vite-env-only": "^3.0.3",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "@nptr/contract-dsl": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
