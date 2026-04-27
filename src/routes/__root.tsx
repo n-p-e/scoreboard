@@ -40,18 +40,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       links: [
         { rel: "stylesheet", href: appCss },
         // { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
-        {
+        ...[16, 32, 48, 64, 128, 256].map((size) => ({
           rel: "icon",
           type: "image/png",
-          sizes: "64x64",
-          href: "/icons/favicon-64x64.png",
-        },
-        {
-          rel: "icon",
-          type: "image/png",
-          sizes: "128x128",
-          href: "/icons/favicon-128x128.png",
-        },
+          size: `${size}x${size}`,
+          href: `/icons/icon-${size}.png`,
+        })),
         {
           rel: "apple-touch-icon",
           type: "image/png",
