@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: testing */
+
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 import { createClient, createContract, endpoint } from "./contract-dsl"
@@ -51,7 +53,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: mockFetch as any,
+      fetcher: mockFetch,
     })
 
     const result = await client.articles.submit({ body: { title: "Hello" } })
@@ -77,7 +79,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: mockFetch as any,
+      fetcher: mockFetch,
     })
 
     // Should throw ZodError because 'id' is missing in the response
@@ -96,7 +98,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: mockFetch as any,
+      fetcher: mockFetch,
     })
 
     const body = { title: "My New Article" }
@@ -120,7 +122,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: mockFetch as any,
+      fetcher: mockFetch,
     })
 
     const result = await client.ping()
@@ -145,7 +147,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: mockFetch as any,
+      fetcher: mockFetch,
     })
 
     const result = await client.profile({
@@ -172,7 +174,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: mockFetch as any,
+      fetcher: mockFetch,
     })
 
     const result = await client.articles.updateSeasonScore({
@@ -211,7 +213,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: mockFetch as any,
+      fetcher: mockFetch,
     })
 
     const result = await client.articles.search({
@@ -237,7 +239,7 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: vi.fn() as any,
+      fetcher: vi.fn(),
     })
 
     await expect(
@@ -260,13 +262,13 @@ describe("Zod Contract Client", () => {
     const client = createClient({
       contract: rootContract,
       baseUrl: "https://test.com",
-      fetcher: vi.fn() as any,
+      fetcher: vi.fn(),
     })
 
     await expect(
       client.articles.search({
         query: {
-          q: 123 as any,
+          q: 123 as unknown as any,
         },
       })
     ).rejects.toThrow()
