@@ -9,6 +9,7 @@ import {
   submitRiichi,
   updateMatch,
 } from "~/riichi/riichi-store"
+import { requiresAdminPrivilege } from "~/server/auth-middleware"
 import { HonoEnv } from "~/server/server-types"
 import {
   jsonValidator,
@@ -17,7 +18,6 @@ import {
 } from "~/server/validator"
 import { integerRange } from "~/utils/schema-util"
 import { StandingsItemZ, SubmitMatchResultRequestZ } from "./riichi-schema"
-import { requiresAdminPrivilege } from "~/server/auth-middleware"
 
 const listMatchesQuerySchema = z.object({
   matchId: z.optional(z.string()),
