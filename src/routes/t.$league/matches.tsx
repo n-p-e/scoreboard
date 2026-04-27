@@ -6,7 +6,16 @@ import {
 } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { format } from "date-fns"
-import { For, Match, Show, Suspense, Switch } from "solid-js"
+import {
+  createSignal,
+  For,
+  Match,
+  onMount,
+  Show,
+  Suspense,
+  Switch,
+} from "solid-js"
+import { NoHydration } from "solid-js/web"
 import * as z from "zod/mini"
 import { appApiClient } from "~/api-contract/client.js"
 import { Button } from "~/components/button.js"
@@ -14,6 +23,7 @@ import { Link } from "~/components/Link.js"
 import { Loading } from "~/components/loading"
 import { findLeague } from "~/league/league-store"
 import { listMatches } from "~/riichi/riichi-store"
+import { timezonePref } from "~/ui-utils/timezone-preference"
 import { queryLoginState } from "~/users/login-state.js"
 
 const loader = createServerFn()
@@ -62,7 +72,9 @@ function MatchesPageContent() {
           {(item) => (
             <li class="flex flex-col w-full border border-gray-500 bg-slate-900 p-4">
               <div class="flex w-full justify-between pb-4 text-gray-200">
-                <span>Match: {formatMatchDate(item.createdAt)}</span>
+                <span>
+                  Match: <DateDisplay date={item.createdAt} />
+                </span>
               </div>
               <div class="flex flex-row flex-wrap w-full gap-4">
                 <For each={item.standings}>
@@ -162,6 +174,43 @@ function MatchesPageContent() {
   )
 }
 
-function formatMatchDate(date: Date): string {
-  return format(date, "d/L/y HH:mm")
+const DateDisplay = (props: { date: Date }) => {
+  const [mounted, setMounted] = createSignal(false)
+  onMount(() => setMounted(true))
+  return (
+    <span>
+      <Show
+        when={mounted()}
+        fallback={<FallbackDateDisplay date={props.date} />}
+      >
+        {formatMatchDate(props.date)}
+      </Show>
+    </span>
+  )
+}
+
+const FallbackDateDisplay = (props: { date: Date }) => {
+  const timezone = timezonePref()
+
+  return (
+    <NoHydration>
+      {timezone
+        ? formatMatchDate(props.date, timezone)
+        : props.date.toISOString()}
+    </NoHydration>
+  )
+}
+
+function formatMatchDate(date: Date, timezone?: string): string {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: timezone,
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+  const result = formatter.format(date)
+  return result
 }
