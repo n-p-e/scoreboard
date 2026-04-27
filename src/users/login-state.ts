@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/solid-start/server"
 import { createResource } from "solid-js"
 import { isServer } from "solid-js/web"
 import { appApiClient } from "~/api-contract/client"
+import { permissionDenied } from "~/error/errors"
 import type { AuthStatusResult } from "~/users/users-schema"
 import { getRequestAuthStatus } from "~/users/users-store"
 
@@ -23,4 +24,11 @@ export const fetchLoginState = async (): Promise<AuthStatusResult> => {
 
 export const queryLoginState = () => {
   return createResource(fetchLoginState)
+}
+
+export function checkAuth(authStatus: AuthStatusResult) {
+  if (!authStatus.loggedIn) {
+    permissionDenied()
+  }
+  return authStatus
 }

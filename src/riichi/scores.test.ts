@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import type { PlayerRawScore } from "./riichi-schema"
+import type { PartialPlayerRawScore } from "./riichi-schema"
 import { calculateMatchStandings } from "./scores"
 
 describe("calculateUmaPoints()", () => {
@@ -9,7 +9,7 @@ describe("calculateUmaPoints()", () => {
         ({
           name: `player_${index}`,
           points: s,
-        }) satisfies PlayerRawScore
+        }) satisfies PartialPlayerRawScore
     )
 
   test("applies uma", () => {

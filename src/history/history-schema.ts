@@ -7,7 +7,7 @@ import {
 export const SubmitMatchRecordZ = z.object({
   action: z.literal("createMatchRecord"),
   reportedMatch: SubmitMatchResultRequestZ.shape.data,
-  standingsItem: StandingsItemZ,
+  standings: StandingsItemZ.shape.standings,
 })
 export type SubmitMatchRecord = z.infer<typeof SubmitMatchRecordZ>
 
@@ -22,15 +22,9 @@ export const DeleteMatchRecordZ = z.object({
   before: StandingsItemZ,
 })
 
-export const ConfirmMatchRecordZ = z.object({
-  action: z.literal("setMatchRecordConfirm"),
-  confirmation: z.boolean(),
-})
-
 export const HistoryRecordZ = z.union([
   SubmitMatchRecordZ,
   EditMatchRecordZ,
   DeleteMatchRecordZ,
-  ConfirmMatchRecordZ,
 ])
 export type HistoryRecord = z.infer<typeof HistoryRecordZ>

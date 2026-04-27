@@ -17,6 +17,7 @@ import {
 } from "~/server/validator"
 import { integerRange } from "~/utils/schema-util"
 import { StandingsItemZ, SubmitMatchResultRequestZ } from "./riichi-schema"
+import { requiresAdminPrivilege } from "~/server/auth-middleware"
 
 const listMatchesQuerySchema = z.object({
   matchId: z.optional(z.string()),
@@ -61,6 +62,7 @@ export const riichiHandler = new Hono<HonoEnv>()
   )
   .put(
     "/leagues/:league/match/:match",
+    requiresAdminPrivilege,
     jsonValidator(updateMatchBodySchema),
     async (c) => {
       const body = c.req.valid("json")
@@ -69,6 +71,7 @@ export const riichiHandler = new Hono<HonoEnv>()
           ...body.data,
           leagueId: c.req.param("league"),
           matchId: c.req.param("match"),
+          auth: c.var.auth,
         }),
       })
     }

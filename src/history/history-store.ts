@@ -9,12 +9,12 @@ export async function recordHistoryItem(
     sourceUser,
     record,
   }: {
-    sourceUser: string
+    sourceUser?: string | null
     record: HistoryRecord
   }
 ) {
   await tx.insert(historyTable).values({
-    source_user: uuidCompactToNormal(sourceUser),
+    source_user: sourceUser ? uuidCompactToNormal(sourceUser) : null,
     action: record.action,
     data: record,
   })
