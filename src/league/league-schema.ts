@@ -32,3 +32,9 @@ export const LeagueStatsZ = z.object({
   items: z.array(LeagueStatsItemZ),
 })
 export type LeagueStats = z.infer<typeof LeagueStatsZ>
+
+export const PatchLeagueRequestZ = z.object({
+  // undefined => no change
+  enabled: z.optional(z.boolean()),
+})
+export type PatchLeagueRequest = z.infer<typeof PatchLeagueRequestZ>

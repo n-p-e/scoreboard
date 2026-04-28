@@ -1,9 +1,18 @@
 import { Hono } from "hono"
 import * as z from "zod/mini"
-import { listLeagues, queryLeagueStats } from "~/league/league-store"
+import {
+  listLeagues,
+  patchLeague,
+  queryLeagueStats,
+} from "~/league/league-store"
 import { requiresAdminPrivilege } from "~/server/auth-middleware"
 import { HonoEnv } from "~/server/server-types"
-import { paramValidator, queryValidator } from "~/server/validator"
+import {
+  jsonValidator,
+  paramValidator,
+  queryValidator,
+} from "~/server/validator"
+import { PatchLeagueRequestZ } from "./league-schema"
 
 export const leaguesHandler = new Hono<HonoEnv>()
   .get("/leagues", requiresAdminPrivilege, async (c) => {
@@ -12,11 +21,11 @@ export const leaguesHandler = new Hono<HonoEnv>()
     })
   })
   .get(
-    "/leagues/:leagueId/stats",
+    "/leagues/:league/stats",
     // requiresAdminPrivilege,
     paramValidator(
       z.object({
-        leagueId: z.string(),
+        league: z.string(),
       })
     ),
     queryValidator(
@@ -28,16 +37,38 @@ export const leaguesHandler = new Hono<HonoEnv>()
       })
     ),
     async (c) => {
+      const { league } = c.req.valid("param")
       const { period, timezone, start, end } = c.req.valid("query")
 
       return c.json(
         await queryLeagueStats({
-          ...c.req.valid("param"),
+          leagueId: league,
           period: period ?? "week",
           timezone,
           start,
           end,
         })
       )
+    }
+  )
+  .patch(
+    "/leagues/:league",
+    requiresAdminPrivilege,
+    paramValidator(
+      z.object({
+        league: z.string(),
+      })
+    ),
+    jsonValidator(PatchLeagueRequestZ),
+    async (c) => {
+      const { league } = c.req.valid("param")
+      const patch = c.req.valid("json")
+      const result = await patchLeague({
+        auth: c.var.auth,
+        leagueId: league,
+        patch,
+      })
+      return c.json({ result })
+
     }
   )

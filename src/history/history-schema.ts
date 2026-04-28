@@ -1,4 +1,5 @@
 import * as z from "zod/mini"
+import { PatchLeagueRequestZ } from "~/league/league-schema"
 import {
   StandingsItemZ,
   SubmitMatchResultRequestZ,
@@ -22,9 +23,15 @@ export const DeleteMatchRecordZ = z.object({
   before: StandingsItemZ,
 })
 
+export const UpdateLeagueHistoryZ = z.object({
+  action: z.literal("updateLeague"),
+  patch: PatchLeagueRequestZ,
+})
+
 export const HistoryRecordZ = z.union([
   SubmitMatchRecordZ,
   EditMatchRecordZ,
   DeleteMatchRecordZ,
+  UpdateLeagueHistoryZ,
 ])
 export type HistoryRecord = z.infer<typeof HistoryRecordZ>

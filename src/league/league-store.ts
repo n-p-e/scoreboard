@@ -8,6 +8,7 @@ import {
   type InferSelectModel,
   isNull,
   lt,
+  sql,
 } from "drizzle-orm"
 import { db } from "~/db/connection"
 import { leaguesTable, standingsTable } from "~/db/schema"
@@ -17,8 +18,15 @@ import type {
   LeaguePlayerGames,
   LeagueStats,
   LeagueStatsItem,
+  PatchLeagueRequest,
   StatsPeriod,
 } from "~/league/league-schema"
+import { AuthStatusResult } from "~/users/users-schema"
+import { checkAuthAdmin } from "~/users/login-state"
+import { recordHistoryItem } from "~/history/history-store"
+import { getLogger } from "~/logger"
+
+const logger = getLogger("league-store")
 
 export async function findLeague(leagueId: string) {
   const res = await db
@@ -37,6 +45,7 @@ export async function listLeagues(params: { limit?: number }) {
     .select()
     .from(leaguesTable)
     .where(isNull(leaguesTable.deleted_at))
+    .orderBy(desc(leaguesTable.created_at))
     .limit(params.limit ?? 50)
   return res.map(toLeagueModel)
 }
@@ -137,6 +146,41 @@ export async function queryLeagueStats(params: {
     period: params.period,
     items: periods,
   }
+}
+
+export async function patchLeague(params: {
+  leagueId: string
+  auth: AuthStatusResult
+  patch: PatchLeagueRequest
+}) {
+  const { leagueId, patch } = params
+  logger.info(params, "patchLeague")
+
+  const auth = checkAuthAdmin(params.auth)
+
+  return await db.transaction(async (tx) => {
+    const updateResult = await tx
+      .update(leaguesTable)
+      .set({
+        status: (() => {
+          if (patch.enabled === undefined) return leaguesTable.status
+          if (patch.enabled) return sql`null`
+          return "disabled"
+        })(),
+      })
+      .where(eq(leaguesTable.league_id, leagueId))
+      .returning()
+
+    await recordHistoryItem(tx, {
+      sourceUser: auth.user.uid,
+      record: {
+        action: "updateLeague",
+        patch,
+      },
+    })
+
+    return updateResult
+  })
 }
 
 export function canUpdateLeague(league: LeagueData) {

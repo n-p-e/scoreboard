@@ -32,3 +32,10 @@ export function checkAuth(authStatus: AuthStatusResult) {
   }
   return authStatus
 }
+
+export function checkAuthAdmin(authStatus: AuthStatusResult) {
+  if (!authStatus.loggedIn || !authStatus.roles.includes("admin")) {
+    permissionDenied()
+  }
+  return authStatus
+}

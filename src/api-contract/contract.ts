@@ -1,6 +1,10 @@
 import { createContract, endpoint } from "@nptr/contract-dsl"
 import * as z from "zod/mini"
-import { LeagueDataZ, LeagueStatsZ } from "~/league/league-schema"
+import {
+  LeagueDataZ,
+  LeagueStatsZ,
+  PatchLeagueRequestZ,
+} from "~/league/league-schema"
 import {
   LeaderboardResultZ,
   StandingsItemZ,
@@ -40,9 +44,9 @@ export const leaguesContract = createContract({ prefix: "" }).routes({
   listLeagues: endpoint.get("/leagues", {
     resBody: z.object({ leagues: z.array(LeagueDataZ) }),
   }),
-  dailySummary: endpoint.get("/leagues/:leagueId/stats", {
+  dailySummary: endpoint.get("/leagues/:league/stats", {
     pathParams: z.object({
-      leagueId: z.string(),
+      league: z.string(),
     }),
     queryParams: z.object({
       period: z.optional(z.enum(["day", "week"])),
@@ -51,6 +55,11 @@ export const leaguesContract = createContract({ prefix: "" }).routes({
       end: z.optional(z.string()),
     }),
     resBody: LeagueStatsZ,
+  }),
+  patchLeague: endpoint.patch("/leagues/:league", {
+    pathParams: z.object({ league: z.string() }),
+    reqBody: PatchLeagueRequestZ,
+    resBody: z.object(),
   }),
 })
 
