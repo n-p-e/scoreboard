@@ -14,10 +14,6 @@ export type PartialFinalScore = {
   finalScore: number
 }
 
-export type MatchResultSubmission = {
-  leagueId: string
-  matchResult: PartialPlayerRawScore[]
-}
 
 export const StandingsItemZ = z.object({
   matchId: z.string(),
@@ -69,7 +65,7 @@ export const SubmitMatchResultRequestZ = z.object({
       z.object({
         name: z.string().check(z.minLength(1, "Player name is empty")),
         points: z.number(),
-        adjustedFinalScore: z.union([z.number(), z.undefined(), z.null()]),
+        adjustedFinalScore: z.optional(z.nullable(z.number())),
       })
     ),
   }),

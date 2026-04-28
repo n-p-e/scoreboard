@@ -71,22 +71,13 @@ export const backendErrorHandler: ErrorHandler = (err, c) => {
     "unknown-error"
   )
 
-  return c.json({ message: "unknown error" }, 500)
+  return c.json({ status: "unknown-error", message: "unknown error" }, 500)
 }
 
 export const notFoundHandler: NotFoundHandler = (c) => {
-  log.warn(
-    {
-      method: c.req.method,
-      url: c.req.url,
-      tag: "route-not-found",
-    },
-    "404-not-found"
-  )
-
   return c.json(
     {
-      tag: "not-found",
+      status: "not-found",
       message: `Route not found: ${c.req.method} ${c.req.path}`,
     },
     404

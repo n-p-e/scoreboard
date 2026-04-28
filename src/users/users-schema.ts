@@ -5,7 +5,7 @@ export const UserZ = z.object({
   uid: uuidString(),
   username: z.string(),
 })
-export type UserModel = z.infer<typeof UserZ>
+export type User = z.infer<typeof UserZ>
 
 const PasswordZ = z
   .string()
@@ -30,7 +30,7 @@ export const AuthTokenZ = z.object({
 })
 export type AuthToken = z.infer<typeof AuthTokenZ>
 
-export const AuthStatusResultZ = z.union([
+export const AuthStatusZ = z.union([
   z.object({
     loggedIn: z.literal(false),
   }),
@@ -40,7 +40,7 @@ export const AuthStatusResultZ = z.union([
     roles: z.array(z.string()),
   }),
 ])
-export type AuthStatusResult = z.infer<typeof AuthStatusResultZ>
+export type AuthStatus = z.infer<typeof AuthStatusZ>
 
 export const ChangePasswordZ = z
   .object({
@@ -48,5 +48,5 @@ export const ChangePasswordZ = z
     oldPassword: PasswordZ,
     newPassword: PasswordZ,
   })
-  .brand()
+  .brand<"ChangePassword">()
 export type ChangePassword = z.infer<typeof ChangePasswordZ>

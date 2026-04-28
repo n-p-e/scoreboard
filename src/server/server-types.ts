@@ -1,15 +1,8 @@
-import { AuthStatusResult } from "~/users/users-schema"
-
-export interface RequestExt {
-  authStatus?: AuthStatusResult
-}
-export interface AppPlatformContext {
-  request: Request
-  authStatus: AuthStatusResult
-}
+import { AuthStatus } from "~/users/users-schema"
 
 interface HonoVariables {
-  auth: AuthStatusResult
+  auth?: AuthStatus
+  sourceIp?: string
 }
 
 export interface HonoEnv {

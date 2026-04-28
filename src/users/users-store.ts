@@ -10,13 +10,13 @@ import { serverEnv } from "~/env.server"
 import { HttpStatusError } from "~/error/http-error"
 import { getLogger } from "~/logger"
 import {
-  type AuthStatusResult,
+  type AuthStatus,
   type AuthToken,
   AuthTokenZ,
-  ChangePassword,
+  type ChangePassword,
+  type User,
   type UserLogin,
   UserLoginZ,
-  type UserModel,
   UserZ,
 } from "~/users/users-schema"
 import { uuidCompactToNormal } from "~/utils/schema-util"
@@ -46,7 +46,7 @@ export async function userLogin(params: UserLogin) {
 
 export async function getRequestAuthStatus(
   request: Request
-): Promise<AuthStatusResult> {
+): Promise<AuthStatus> {
   const authorizationHeader = request.headers.get("Authorization")
   let token: string | undefined
   const authTokenCookie = new CookieMap(
@@ -99,7 +99,7 @@ export async function parseAuthTokenInner(
 
 export async function parseAuthToken(
   token: string | null | undefined
-): Promise<AuthStatusResult> {
+): Promise<AuthStatus> {
   const parseResult = await parseAuthTokenInner(token)
   if (parseResult.ok) {
     return {
@@ -127,7 +127,7 @@ export async function queryUserRoles(
         isAuthed: true
       }
 ): Promise<{
-  user: UserModel
+  user: User
   roles: string[]
 }> {
   // const foundUser = await db.query.usersTable.findFirst({
@@ -209,7 +209,7 @@ export async function changePassword({
 
   if (res.length !== 1) {
     logger.warn({
-      msg: "changePasssword: incorrect number of rows updated",
+      msg: "changePassword: incorrect number of rows updated",
       updateCount: res.length,
     })
   }
@@ -227,10 +227,10 @@ async function hashPassword(password: string): Promise<string> {
   return await BunPassword.hash(password, { algorithm: "argon2id" })
 }
 
-function toUserModel(u: InferSelectModel<typeof usersTable>): UserModel {
+function toUserModel(u: InferSelectModel<typeof usersTable>): User {
   // Parse to format the uuid representation
   return UserZ.parse({
     uid: u.id,
     username: u.username,
-  } satisfies UserModel)
+  } satisfies User)
 }

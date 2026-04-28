@@ -17,16 +17,19 @@ export const EditMatchRecordZ = z.object({
   before: StandingsItemZ,
   after: StandingsItemZ,
 })
+export type EditMatchRecord = z.infer<typeof EditMatchRecordZ>
 
 export const DeleteMatchRecordZ = z.object({
   action: z.literal("deleteMatchRecord"),
   before: StandingsItemZ,
 })
+export type DeleteMatchRecord = z.infer<typeof DeleteMatchRecordZ>
 
 export const UpdateLeagueHistoryZ = z.object({
   action: z.literal("updateLeague"),
   patch: PatchLeagueRequestZ,
 })
+export type UpdateLeagueHistory = z.infer<typeof UpdateLeagueHistoryZ>
 
 export const HistoryRecordZ = z.union([
   SubmitMatchRecordZ,

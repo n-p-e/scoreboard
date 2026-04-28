@@ -18,6 +18,7 @@ import {
 } from "~/server/validator"
 import { integerRange } from "~/utils/schema-util"
 import { StandingsItemZ, SubmitMatchResultRequestZ } from "./riichi-schema"
+import { checkAuth } from "~/users/auth"
 
 const listMatchesQuerySchema = z.object({
   matchId: z.optional(z.string()),
@@ -120,7 +121,7 @@ export const riichiHandler = new Hono<HonoEnv>()
       await patchStanding({
         ...c.req.param(),
         patchArgs: c.req.valid("json"),
-        auth: c.var.auth,
+        auth: checkAuth(c.var.auth),
       })
 
       return c.json({
@@ -131,7 +132,7 @@ export const riichiHandler = new Hono<HonoEnv>()
   .delete("/leagues/:leagueId/match/:matchId", async (c) => {
     await deleteStanding({
       ...c.req.param(),
-      user: c.var.auth,
+      auth: checkAuth(c.var.auth),
     })
 
     return c.json({

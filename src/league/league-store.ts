@@ -24,7 +24,7 @@ import type {
 } from "~/league/league-schema"
 import { getLogger } from "~/logger"
 import { checkAdminRole } from "~/users/auth"
-import { AuthStatusResult } from "~/users/users-schema"
+import type { AuthStatus } from "~/users/users-schema"
 
 const logger = getLogger("league-store")
 
@@ -52,7 +52,7 @@ export async function listLeagues(params: { limit?: number }) {
 
 export async function queryLeagueStats(params: {
   leagueId: string
-  period: "day" | "week"
+  period: StatsPeriod
   timezone?: string
   start?: string
   end?: string
@@ -150,7 +150,7 @@ export async function queryLeagueStats(params: {
 
 export async function patchLeague(params: {
   leagueId: string
-  auth: AuthStatusResult
+  auth: AuthStatus
   patch: PatchLeagueRequest
 }) {
   const { leagueId, patch } = params

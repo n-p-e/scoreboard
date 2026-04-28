@@ -17,7 +17,6 @@ import {
 import { db, Transaction } from "~/db/connection"
 import { playersTable, standingsItemsView, standingsTable } from "~/db/schema"
 import { withTxn } from "~/db/transaction"
-import { permissionDenied } from "~/error/errors"
 import { HttpStatusError } from "~/error/http-error"
 import { recordHistoryItem } from "~/history/history-store"
 import { canUpdateLeague, findLeague } from "~/league/league-store"
@@ -30,8 +29,8 @@ import type {
   SubmitMatchResultRequest,
 } from "~/riichi/riichi-schema"
 import { calculateMatchStandings, sortStandings } from "~/riichi/scores"
-import { checkAuth } from "~/users/auth"
-import type { AuthStatusResult } from "~/users/users-schema"
+import { checkAdminRole, checkAuth } from "~/users/auth"
+import type { AuthStatus } from "~/users/users-schema"
 
 const logger = getLogger("riichi-store")
 
@@ -134,7 +133,7 @@ export async function listMatches(params: {
 }
 
 export async function updateMatch(
-  params: StandingsItem & { auth: AuthStatusResult }
+  params: StandingsItem & { auth: AuthStatus }
 ): Promise<StandingsItem> {
   return await db.transaction(async (tx) => {
     const before = await tx
@@ -284,13 +283,10 @@ export const patchStanding = withTxn(
       patchArgs: {
         confirmed: boolean
       }
-      auth: AuthStatusResult
+      auth: AuthStatus
     }
   ) => {
-    if (!params.auth.loggedIn || !params.auth.roles.includes("admin")) {
-      permissionDenied()
-    }
-    const uid = params.auth.user.uid
+    const uid = checkAdminRole(params.auth).user.uid
     const before = await tx
       .select()
       .from(standingsTable)
@@ -339,12 +335,10 @@ export const deleteStanding = withTxn(
     params: {
       leagueId: string
       matchId: string
-      user: AuthStatusResult
+      auth: AuthStatus
     }
   ) => {
-    if (!params.user.loggedIn || !params.user.roles.includes("admin")) {
-      permissionDenied()
-    }
+    checkAdminRole(params.auth)
 
     const updateRes = await tx
       .update(standingsTable)

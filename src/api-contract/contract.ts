@@ -10,11 +10,7 @@ import {
   StandingsItemZ,
   SubmitMatchResultRequestZ,
 } from "~/riichi/riichi-schema"
-import {
-  AuthStatusResultZ,
-  ChangePasswordZ,
-  UserLoginZ,
-} from "~/users/users-schema"
+import { AuthStatusZ, ChangePasswordZ, UserLoginZ } from "~/users/users-schema"
 import { integerRange } from "~/utils/schema-util"
 
 // --- Users Contract ---
@@ -30,7 +26,7 @@ export const usersContract = createContract({ prefix: "" }).routes({
   }),
 
   queryLoginStatus: endpoint.get("/profile", {
-    resBody: AuthStatusResultZ,
+    resBody: AuthStatusZ,
   }),
 
   changePassword: endpoint.post("/user/change-password", {

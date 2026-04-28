@@ -1,10 +1,10 @@
 import { createMiddleware } from "hono/factory"
-import { AuthStatusResult } from "~/users/users-schema"
+import { AuthStatus } from "~/users/users-schema"
 import { getRequestAuthStatus } from "~/users/users-store"
 
 export const authMiddleware = createMiddleware<{
   Variables: {
-    auth: AuthStatusResult
+    auth: AuthStatus
   }
 }>(async (c, next) => {
   c.set("auth", await getRequestAuthStatus(c.req.raw))
@@ -13,7 +13,7 @@ export const authMiddleware = createMiddleware<{
 
 export const requiresAdminPrivilege = createMiddleware<{
   Variables: {
-    auth: AuthStatusResult
+    auth: AuthStatus
   }
 }>(async (c, next) => {
   if (!c.var.auth.loggedIn || !c.var.auth.roles.includes("admin")) {

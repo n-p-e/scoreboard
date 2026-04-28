@@ -1,4 +1,3 @@
-import { appEnv } from "~/env"
 import { AppError } from "~/error/app-error"
 
 export function isAppError(error: unknown): error is AppError {
@@ -7,7 +6,6 @@ export function isAppError(error: unknown): error is AppError {
 
 export function formatError(error: unknown) {
   if (error instanceof AppError) return error.message
-  if (!appEnv.isProduction && error instanceof Error)
-    return `[${error.name}] ${error}`
+  if (error instanceof Error) return `[${error.name}] ${error}`
   return "An error has occured"
 }
