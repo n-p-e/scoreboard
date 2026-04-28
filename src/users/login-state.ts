@@ -1,25 +1,22 @@
-import { createServerFn } from "@tanstack/solid-start"
+import { createIsomorphicFn } from "@tanstack/solid-start"
 import { getRequest } from "@tanstack/solid-start/server"
 import { createResource } from "solid-js"
-import { isServer } from "solid-js/web"
 import { appApiClient } from "~/api-contract/client"
 import type { AuthStatusResult } from "~/users/users-schema"
-import { getRequestAuthStatus } from "~/users/users-store"
+import { getRequestAuthStatus } from "./users-store"
 
-const loginState = createServerFn().handler(async () => {
-  const request = getRequest()
-  return await getRequestAuthStatus(request)
-})
-
-export const fetchLoginState = async (): Promise<AuthStatusResult> => {
-  if (isServer) return await loginState()
-
-  const res = await appApiClient.users.queryLoginStatus()
-  if (res.status === 200) {
-    return res.body
-  }
-  return { loggedIn: false }
-}
+export const fetchLoginState = createIsomorphicFn()
+  .client(async (): Promise<AuthStatusResult> => {
+    const res = await appApiClient.users.queryLoginStatus()
+    if (res.status === 200) {
+      return res.body
+    }
+    return { loggedIn: false }
+  })
+  .server(async () => {
+    const request = getRequest()
+    return await getRequestAuthStatus(request)
+  })
 
 export const queryLoginState = () => {
   return createResource(fetchLoginState)
