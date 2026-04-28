@@ -26,12 +26,8 @@ export const leaguesHandler = new Hono<HonoEnv>()
   .get(
     "/leagues/:league/stats",
     // requiresAdminPrivilege,
-    paramValidator(
-      contractDef.leagueStats.pathParams
-    ),
-    queryValidator(
-      contractDef.leagueStats.queryParams
-    ),
+    paramValidator(contractDef.leagueStats.pathParams),
+    queryValidator(contractDef.leagueStats.queryParams),
     async (c) => {
       const { league } = c.req.valid("param")
       const { period, timezone, start, end } = c.req.valid("query")
