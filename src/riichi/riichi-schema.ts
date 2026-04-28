@@ -14,7 +14,6 @@ export type PartialFinalScore = {
   finalScore: number
 }
 
-
 export const StandingsItemZ = z.object({
   matchId: z.string(),
   leagueId: z.string(),

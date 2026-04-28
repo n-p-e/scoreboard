@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest"
 import type { PartialPlayerRawScore } from "./riichi-schema"
 import { calculateMatchStandings, sortStandings } from "./scores"
-import { PgTransaction } from "drizzle-orm/pg-core"
 
 describe("scores", () => {
   describe("calculateUmaPoints()", () => {

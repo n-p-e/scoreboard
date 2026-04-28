@@ -16,9 +16,9 @@ import {
   paramValidator,
   queryValidator,
 } from "~/server/validator"
+import { checkAuth } from "~/users/auth"
 import { integerRange } from "~/utils/schema-util"
 import { StandingsItemZ, SubmitMatchResultRequestZ } from "./riichi-schema"
-import { checkAuth } from "~/users/auth"
 
 const listMatchesQuerySchema = z.object({
   matchId: z.optional(z.string()),
