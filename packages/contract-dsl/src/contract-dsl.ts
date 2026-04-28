@@ -15,31 +15,19 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & Record<never, never>
 
-export type RouteDef<
-  PathParams extends ZodType | undefined = undefined,
-  QueryParams extends ZodType | undefined = undefined,
-  ReqBody extends ZodType | undefined = undefined,
-  ResBody extends ZodType = ZodType,
-> = {
-  method: Method
-  path: string
-  pathParams: PathParams
-  queryParams: QueryParams
-  reqBody: ReqBody
-  resBody: ResBody
+export interface RouteDef {
+  queryParams?: ZodType
+  pathParams?: ZodType
+  reqBody?: ZodType
+  resBody: ZodType
 }
 
-export type AnyRouteDef = RouteDef<
-  ZodType | undefined,
-  ZodType | undefined,
-  ZodType | undefined,
-  ZodType
->
+export interface RouteData extends RouteDef {
+  path: string
+  method: Method
+}
 
-/**
- * We constrain Definitions to ensure it only contains Routes or sub-Contracts.
- */
-export interface Contract<Definitions = Record<string, AnyRouteDef | unknown>> {
+export interface Contract<Definitions = any> {
   prefix: string
   definitions: Definitions
 }
@@ -49,54 +37,31 @@ export type ClientResponse<ResBody extends ZodType> = Promise<{
   body: z.output<ResBody>
 }>
 
-/**
- * Maps Zod schemas to a unified Input type.
- */
-type RouteArgs<
-  PathParams extends ZodType | undefined,
-  QueryParams extends ZodType | undefined,
-  ReqBody extends ZodType | undefined,
-> = Prettify<
-  ([PathParams] extends [ZodType]
-    ? { params: z.input<PathParams> }
+type RouteArgs<T extends RouteDef> = Prettify<
+  (T["pathParams"] extends ZodType
+    ? { params: z.input<T["pathParams"]> }
     : Record<never, never>) &
-    ([QueryParams] extends [ZodType]
-      ? { query: z.input<QueryParams> }
+    (T["queryParams"] extends ZodType
+      ? { query: z.input<T["queryParams"]> }
       : Record<never, never>) &
-    ([ReqBody] extends [ZodType]
-      ? { body: z.input<ReqBody> }
+    (T["reqBody"] extends ZodType
+      ? { body: z.input<T["reqBody"]> }
       : Record<never, never>)
 >
 
-/**
- * Determines if a route requires an arguments object or not.
- */
 type IsEmpty<T> = keyof T extends never ? true : false
 
 // --- Endpoint Builder ---
 
 const createEndpoint =
   (method: Method) =>
-  <
-    Res extends ZodType,
-    Req extends ZodType | undefined = undefined,
-    Params extends ZodType | undefined = undefined,
-    Query extends ZodType | undefined = undefined,
-  >(
+  <R extends RouteDef>(
     path: string,
-    schemas: {
-      pathParams?: Params
-      queryParams?: Query
-      reqBody?: Req
-      resBody: Res
-    }
-  ): RouteDef<Params, Query, Req, Res> => ({
-    method,
+    routeConfig: R
+  ): R & { method: Method; path: string } => ({
+    ...routeConfig,
     path,
-    pathParams: schemas.pathParams as Params,
-    queryParams: schemas.queryParams as Query,
-    reqBody: schemas.reqBody as Req,
-    resBody: schemas.resBody,
+    method,
   })
 
 export const endpoint = {
@@ -111,7 +76,7 @@ export const endpoint = {
 
 export const createContract = (options: { prefix: string }) => {
   return {
-    routes: <T extends Record<string, AnyRouteDef | Contract>>(
+    routes: <T extends Record<string, RouteDef | Contract>>(
       definitions: T
     ): Contract<T> => ({
       prefix: options.prefix,
@@ -129,18 +94,15 @@ export interface CommonClientArgs {
 export type Client<T> =
   T extends Contract<infer D>
     ? {
-        [K in keyof D]: D[K] extends RouteDef<
-          infer P,
-          infer Q,
-          infer B,
-          infer Res
-        >
-          ? IsEmpty<RouteArgs<P, Q, B>> extends true
-            ? (args?: CommonClientArgs) => ClientResponse<Res>
+        [K in keyof D]: D[K] extends RouteData
+          ? IsEmpty<RouteArgs<D[K]>> extends true
+            ? (args?: CommonClientArgs) => ClientResponse<D[K]["resBody"]>
             : (
-                args: CommonClientArgs & RouteArgs<P, Q, B>
-              ) => ClientResponse<Res>
-          : Client<D[K]>
+                args: CommonClientArgs & RouteArgs<D[K]>
+              ) => ClientResponse<D[K]["resBody"]>
+          : D[K] extends Contract<any>
+            ? Client<D[K]>
+            : never
       }
     : never
 
@@ -168,7 +130,7 @@ export function createClient<T extends Contract>({
       {
         get(_, prop: string) {
           const item = currentContract.definitions[prop] as
-            | AnyRouteDef
+            | RouteData
             | Contract
             | undefined
           if (!item) throw new Error(`Property ${prop} not found in contract`)

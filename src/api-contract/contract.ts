@@ -44,7 +44,7 @@ export const leaguesContract = createContract({ prefix: "" }).routes({
   listLeagues: endpoint.get("/leagues", {
     resBody: z.object({ leagues: z.array(LeagueDataZ) }),
   }),
-  dailySummary: endpoint.get("/leagues/:league/stats", {
+  leagueStats: endpoint.get("/leagues/:league/stats", {
     pathParams: z.object({
       league: z.string(),
     }),
