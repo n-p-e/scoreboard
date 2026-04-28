@@ -32,6 +32,25 @@ export function calculateMatchStandings(
   return sorted
 }
 
+export function sortStandings<
+  T extends {
+    points: number | null
+    rank: number
+  },
+>(standings: T[]): T[] {
+  return standings
+    .slice()
+    .sort((a, b) => {
+      const cmp0 = compareDescOrder(a.points, b.points)
+      if (cmp0 !== 0) return cmp0
+      return compareAscOrder(a.rank, b.rank)
+    })
+    .map((item, rank) => ({
+      ...item,
+      rank,
+    }))
+}
+
 function compareAscOrder(a: number | null, b: number | null) {
   if (a == null && b == null) return 0
   if (a == null) return 1
