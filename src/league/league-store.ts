@@ -13,6 +13,7 @@ import {
 import { db } from "~/db/connection"
 import { leaguesTable, standingsTable } from "~/db/schema"
 import { HttpStatusError } from "~/error/http-error"
+import { recordHistoryItem } from "~/history/history-store"
 import type {
   LeagueData,
   LeaguePlayerGames,
@@ -21,10 +22,9 @@ import type {
   PatchLeagueRequest,
   StatsPeriod,
 } from "~/league/league-schema"
-import { AuthStatusResult } from "~/users/users-schema"
-import { checkAuthAdmin } from "~/users/login-state"
-import { recordHistoryItem } from "~/history/history-store"
 import { getLogger } from "~/logger"
+import { checkAuthAdmin } from "~/users/login-state"
+import { AuthStatusResult } from "~/users/users-schema"
 
 const logger = getLogger("league-store")
 

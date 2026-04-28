@@ -69,6 +69,5 @@ export const leaguesHandler = new Hono<HonoEnv>()
         patch,
       })
       return c.json({ result })
-
     }
   )
