@@ -20,7 +20,10 @@ import { calculateMatchStandings } from "~/riichi/scores"
 import { createAsyncAction } from "~/ui-utils/action"
 import { createDebouncedGetter } from "~/ui-utils/debounce"
 import { arraySet, sum } from "~/utils/arrays"
-import type { PlayerRawScore, SubmitMatchResultRequest } from "./riichi-schema"
+import type {
+  PartialPlayerRawScore,
+  SubmitMatchResultRequest,
+} from "./riichi-schema"
 
 const playerNums = [0, 1, 2, 3]
 const defaultTotalScore = 100_000
@@ -41,7 +44,7 @@ export const RiichiResultSubmission = (props: { league: LeagueData }) => {
           ({
             name: names()[player],
             points: results()[player],
-          }) satisfies PlayerRawScore
+          }) satisfies PartialPlayerRawScore
       )
     )
   )

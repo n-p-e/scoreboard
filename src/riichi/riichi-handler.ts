@@ -9,6 +9,7 @@ import {
   submitRiichi,
   updateMatch,
 } from "~/riichi/riichi-store"
+import { requiresAdminPrivilege } from "~/server/auth-middleware"
 import { HonoEnv } from "~/server/server-types"
 import {
   jsonValidator,
@@ -61,6 +62,7 @@ export const riichiHandler = new Hono<HonoEnv>()
   )
   .put(
     "/leagues/:league/match/:match",
+    requiresAdminPrivilege,
     jsonValidator(updateMatchBodySchema),
     async (c) => {
       const body = c.req.valid("json")
@@ -69,6 +71,7 @@ export const riichiHandler = new Hono<HonoEnv>()
           ...body.data,
           leagueId: c.req.param("league"),
           matchId: c.req.param("match"),
+          auth: c.var.auth,
         }),
       })
     }

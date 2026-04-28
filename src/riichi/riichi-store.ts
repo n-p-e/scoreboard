@@ -18,21 +18,23 @@ import { db, Transaction } from "~/db/connection"
 import { playersTable, standingsItemsView, standingsTable } from "~/db/schema"
 import { permissionDenied } from "~/error/errors"
 import { HttpStatusError } from "~/error/http-error"
+import { recordHistoryItem } from "~/history/history-store"
 import { canUpdateLeague, findLeague } from "~/league/league-store"
 import { getLogger } from "~/logger"
 import type {
-  FinalScore,
   LeaderboardResult,
-  MatchResultSubmission,
+  PartialFinalScore,
   PlayerData,
   StandingsItem,
+  SubmitMatchResultRequest,
 } from "~/riichi/riichi-schema"
 import { calculateMatchStandings } from "~/riichi/scores"
+import { checkAuth } from "~/users/login-state"
 import type { AuthStatusResult } from "~/users/users-schema"
 
 const logger = getLogger("riichi-store")
 
-export async function submitRiichi(params: MatchResultSubmission) {
+export async function submitRiichi(params: SubmitMatchResultRequest["data"]) {
   logger.info({ params }, "submitRiichi")
 
   const league = await findLeague(params.leagueId)
@@ -62,6 +64,15 @@ export async function submitRiichi(params: MatchResultSubmission) {
       .returning()
     // load the players
     await addPlayers(tx, res[0].data.standings)
+
+    await recordHistoryItem(tx, {
+      sourceUser: null,
+      record: {
+        action: "createMatchRecord",
+        reportedMatch: params,
+        standings,
+      },
+    })
     return res[0]
   })
 }
@@ -69,7 +80,7 @@ export async function submitRiichi(params: MatchResultSubmission) {
 /**
  * Add first-time players to database, and update existing players' last active time
  */
-async function addPlayers(tx: Transaction, standings: FinalScore[]) {
+async function addPlayers(tx: Transaction, standings: PartialFinalScore[]) {
   const players = standings.map((s) => s.name)
   const now = new Date()
   await tx
@@ -122,9 +133,14 @@ export async function listMatches(params: {
 }
 
 export async function updateMatch(
-  params: StandingsItem
+  params: StandingsItem & { auth: AuthStatusResult }
 ): Promise<StandingsItem> {
   return await db.transaction(async (tx) => {
+    const before = await tx
+      .select()
+      .from(standingsTable)
+      .where(eq(standingsTable.id, parseInt(params.matchId, 10)))
+
     const updated = await tx
       .update(standingsTable)
       .set({
@@ -134,11 +150,21 @@ export async function updateMatch(
         },
       })
       .where(eq(standingsTable.id, parseInt(params.matchId, 10)))
+      .returning()
 
-    if ((updated.rowCount ?? 0) <= 0) {
+    if ((updated.length ?? 0) <= 0) {
       throw new HttpStatusError(400, "Unable to update match")
     }
     await addPlayers(tx, params.standings)
+
+    await recordHistoryItem(tx, {
+      sourceUser: checkAuth(params.auth).user.uid,
+      record: {
+        action: "updateMatchRecord",
+        before: toStandingsItem(before[0]),
+        after: toStandingsItem(updated[0]),
+      },
+    })
 
     return (
       await listMatches({
@@ -259,25 +285,49 @@ export async function patchStanding(params: {
   if (!params.auth.loggedIn || !params.auth.roles.includes("admin")) {
     permissionDenied()
   }
+  const uid = params.auth.user.uid
 
-  const updateRes = await db
-    .update(standingsTable)
-    .set({
-      confirmed_at: (() => {
-        if (params.patchArgs.confirmed) return new Date()
-        return null
-      })(),
-    })
-    .where(
-      and(
-        eq(standingsTable.league_id, params.leagueId),
-        eq(standingsTable.id, parseInt(params.matchId, 10))
+  return await db.transaction(async (tx) => {
+    const before = await tx
+      .select()
+      .from(standingsTable)
+      .where(
+        and(
+          eq(standingsTable.league_id, params.leagueId),
+          eq(standingsTable.id, parseInt(params.matchId, 10))
+        )
       )
-    )
-  if ((updateRes.rowCount ?? 0) > 0) {
-    return
-  }
-  throw new HttpStatusError(400, "Could not update standing")
+
+    const updateRes = await tx
+      .update(standingsTable)
+      .set({
+        confirmed_at: (() => {
+          if (params.patchArgs.confirmed) return new Date()
+          return null
+        })(),
+      })
+      .where(
+        and(
+          eq(standingsTable.league_id, params.leagueId),
+          eq(standingsTable.id, parseInt(params.matchId, 10))
+        )
+      )
+      .returning()
+    if ((updateRes.length ?? 0) > 0) {
+      await recordHistoryItem(tx, {
+        record: {
+          action: "updateMatchRecord",
+          before: toStandingsItem(before[0]),
+          after: toStandingsItem(updateRes[0]),
+        },
+        sourceUser: uid,
+      })
+
+      return updateRes
+    }
+
+    throw new HttpStatusError(400, "Could not update standing")
+  })
 }
 
 export async function deleteStanding(params: {

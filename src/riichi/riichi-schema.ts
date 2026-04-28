@@ -1,12 +1,12 @@
 import * as z from "zod/mini"
 
-export type PlayerRawScore = {
+export type PartialPlayerRawScore = {
   name: string
   points: number | null
   adjustedFinalScore?: number | null
 }
 
-export type FinalScore = {
+export type PartialFinalScore = {
   name: string
   points: number | null
   rank: number
@@ -16,7 +16,7 @@ export type FinalScore = {
 
 export type MatchResultSubmission = {
   leagueId: string
-  matchResult: PlayerRawScore[]
+  matchResult: PartialPlayerRawScore[]
 }
 
 export const StandingsItemZ = z.object({
@@ -74,4 +74,5 @@ export const SubmitMatchResultRequestZ = z.object({
     ),
   }),
 })
+
 export type SubmitMatchResultRequest = z.infer<typeof SubmitMatchResultRequestZ>

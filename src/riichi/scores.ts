@@ -1,13 +1,16 @@
-import type { FinalScore, PlayerRawScore } from "~/riichi/riichi-schema"
+import type {
+  PartialFinalScore,
+  PartialPlayerRawScore,
+} from "~/riichi/riichi-schema"
 
 export const defaultUma = [300, 100, -100, -300]
 export const defaultInitialPoints = 250
 
 export function calculateMatchStandings(
-  scores: PlayerRawScore[],
+  scores: PartialPlayerRawScore[],
   uma = defaultUma,
   initial = defaultInitialPoints
-): FinalScore[] {
+): PartialFinalScore[] {
   // sort and preserve original index
   const sorted = scores
     .map((v, index) => ({ ...v, index }))

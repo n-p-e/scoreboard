@@ -15,7 +15,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 import { uuidv7 } from "uuidv7"
-import type { FinalScore } from "~/riichi/riichi-schema"
+import type { PartialFinalScore } from "~/riichi/riichi-schema"
 
 function createdUpdatedAtCols() {
   return {
@@ -51,7 +51,7 @@ export const standingsTable = pgTable("standings", {
     .references((): AnyPgColumn => leaguesTable.league_id, {
       onDelete: "cascade",
     }),
-  data: jsonb().notNull().$type<{ standings: FinalScore[] }>(),
+  data: jsonb().notNull().$type<{ standings: PartialFinalScore[] }>(),
   confirmed_at: timestamp(),
   ...createdUpdatedAtCols(),
 })
@@ -117,3 +117,13 @@ export const playersTable = pgTable(
     ),
   ]
 )
+
+export const historyTable = pgTable("ops_history", {
+  id: uuid()
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
+  source_user: uuid().references(() => usersTable.id),
+  action: varchar().notNull(),
+  data: jsonb().notNull().default("{}"),
+  ...createdUpdatedAtCols(),
+})
