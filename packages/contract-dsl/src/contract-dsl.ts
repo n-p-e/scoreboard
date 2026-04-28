@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: type gymnastics */
 import * as z from "zod/mini"
 
 export type Fetcher = (
@@ -15,6 +16,9 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & Record<never, never>
 
+/**
+ * The definition supplied by DSL
+ */
 export interface RouteDef {
   queryParams?: ZodType
   pathParams?: ZodType
@@ -22,6 +26,9 @@ export interface RouteDef {
   resBody: ZodType
 }
 
+/**
+ * Combined with the endpoint output
+ */
 export interface RouteData extends RouteDef {
   path: string
   method: Method
@@ -91,17 +98,21 @@ export interface CommonClientArgs {
   fetchOptions?: RequestInit
 }
 
+// Client type: D is the definition map
 export type Client<T> =
-  T extends Contract<infer D>
+  T extends Contract<infer Def>
     ? {
-        [K in keyof D]: D[K] extends RouteData
-          ? IsEmpty<RouteArgs<D[K]>> extends true
-            ? (args?: CommonClientArgs) => ClientResponse<D[K]["resBody"]>
+        // is it a route definition?
+        [K in keyof Def]: Def[K] extends RouteData
+          ? // the function async (args) => response
+            IsEmpty<RouteArgs<Def[K]>> extends true
+            ? (args?: CommonClientArgs) => ClientResponse<Def[K]["resBody"]>
             : (
-                args: CommonClientArgs & RouteArgs<D[K]>
-              ) => ClientResponse<D[K]["resBody"]>
-          : D[K] extends Contract<any>
-            ? Client<D[K]>
+                args: CommonClientArgs & RouteArgs<Def[K]>
+              ) => ClientResponse<Def[K]["resBody"]>
+          : // recurse
+            Def[K] extends Contract<any>
+            ? Client<Def[K]>
             : never
       }
     : never

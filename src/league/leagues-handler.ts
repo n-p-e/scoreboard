@@ -1,5 +1,6 @@
 import { Hono } from "hono"
 import * as z from "zod/mini"
+import { apiContract } from "~/api-contract/contract"
 import {
   listLeagues,
   patchLeague,
@@ -14,6 +15,8 @@ import {
 } from "~/server/validator"
 import { PatchLeagueRequestZ } from "./league-schema"
 
+const contractDef = apiContract.definitions.leagues.definitions
+
 export const leaguesHandler = new Hono<HonoEnv>()
   .get("/leagues", requiresAdminPrivilege, async (c) => {
     return c.json({
@@ -24,17 +27,10 @@ export const leaguesHandler = new Hono<HonoEnv>()
     "/leagues/:league/stats",
     // requiresAdminPrivilege,
     paramValidator(
-      z.object({
-        league: z.string(),
-      })
+      contractDef.leagueStats.pathParams
     ),
     queryValidator(
-      z.object({
-        period: z.optional(z.enum(["day", "week"])),
-        timezone: z.optional(z.string()),
-        start: z.optional(z.string()),
-        end: z.optional(z.string()),
-      })
+      contractDef.leagueStats.queryParams
     ),
     async (c) => {
       const { league } = c.req.valid("param")
