@@ -3,7 +3,7 @@ import { orderStandingsByRawPoints } from "./riichi-store"
 import { calculateMatchStandings } from "./scores"
 
 describe("riichi-store", () => {
-  test("orders adjusted standings by raw points, not adjusted final score", async () => {
+  test("orders adjusted standings by raw points", async () => {
     const standings = orderStandingsByRawPoints(
       calculateMatchStandings(
         [200, 200, 300, 300].map((points, index) => ({

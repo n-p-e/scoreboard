@@ -29,7 +29,7 @@ import type {
   SubmitMatchResultRequest,
 } from "~/riichi/riichi-schema"
 import { calculateMatchStandings } from "~/riichi/scores"
-import { checkAuth } from "~/users/login-state"
+import { checkAuth } from "~/users/auth"
 import type { AuthStatusResult } from "~/users/users-schema"
 
 const logger = getLogger("riichi-store")

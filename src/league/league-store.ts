@@ -23,7 +23,7 @@ import type {
   StatsPeriod,
 } from "~/league/league-schema"
 import { getLogger } from "~/logger"
-import { checkAuthAdmin } from "~/users/login-state"
+import { checkAdminRole } from "~/users/auth"
 import { AuthStatusResult } from "~/users/users-schema"
 
 const logger = getLogger("league-store")
@@ -156,7 +156,7 @@ export async function patchLeague(params: {
   const { leagueId, patch } = params
   logger.info(params, "patchLeague")
 
-  const auth = checkAuthAdmin(params.auth)
+  const auth = checkAdminRole(params.auth)
 
   return await db.transaction(async (tx) => {
     const updateResult = await tx
