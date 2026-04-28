@@ -16,6 +16,7 @@ import {
 } from "drizzle-orm"
 import { db, Transaction } from "~/db/connection"
 import { playersTable, standingsItemsView, standingsTable } from "~/db/schema"
+import { withTxn } from "~/db/transaction"
 import { permissionDenied } from "~/error/errors"
 import { HttpStatusError } from "~/error/http-error"
 import { recordHistoryItem } from "~/history/history-store"
@@ -28,7 +29,7 @@ import type {
   StandingsItem,
   SubmitMatchResultRequest,
 } from "~/riichi/riichi-schema"
-import { calculateMatchStandings } from "~/riichi/scores"
+import { calculateMatchStandings, sortStandings } from "~/riichi/scores"
 import { checkAuth } from "~/users/auth"
 import type { AuthStatusResult } from "~/users/users-schema"
 
@@ -45,7 +46,7 @@ export async function submitRiichi(params: SubmitMatchResultRequest["data"]) {
     })
   }
 
-  const standings = orderStandingsByRawPoints(
+  const standings = sortStandings(
     calculateMatchStandings(params.matchResult).map((item, index) => ({
       ...item,
       finalScore:
@@ -146,7 +147,7 @@ export async function updateMatch(
       .set({
         created_at: params.createdAt,
         data: {
-          standings: orderStandingsByRawPoints(params.standings),
+          standings: sortStandings(params.standings),
         },
       })
       .where(eq(standingsTable.id, parseInt(params.matchId, 10)))
@@ -274,20 +275,22 @@ export async function queryLeaderboard(params: {
   })
 }
 
-export async function patchStanding(params: {
-  leagueId: string
-  matchId: string
-  patchArgs: {
-    confirmed: boolean
-  }
-  auth: AuthStatusResult
-}) {
-  if (!params.auth.loggedIn || !params.auth.roles.includes("admin")) {
-    permissionDenied()
-  }
-  const uid = params.auth.user.uid
-
-  return await db.transaction(async (tx) => {
+export const patchStanding = withTxn(
+  async (
+    tx,
+    params: {
+      leagueId: string
+      matchId: string
+      patchArgs: {
+        confirmed: boolean
+      }
+      auth: AuthStatusResult
+    }
+  ) => {
+    if (!params.auth.loggedIn || !params.auth.roles.includes("admin")) {
+      permissionDenied()
+    }
+    const uid = params.auth.user.uid
     const before = await tx
       .select()
       .from(standingsTable)
@@ -327,34 +330,39 @@ export async function patchStanding(params: {
     }
 
     throw new HttpStatusError(400, "Could not update standing")
-  })
-}
-
-export async function deleteStanding(params: {
-  leagueId: string
-  matchId: string
-  user: AuthStatusResult
-}) {
-  if (!params.user.loggedIn || !params.user.roles.includes("admin")) {
-    permissionDenied()
   }
+)
 
-  const updateRes = await db
-    .update(standingsTable)
-    .set({
-      deleted_at: new Date(),
-    })
-    .where(
-      and(
-        eq(standingsTable.league_id, params.leagueId),
-        eq(standingsTable.id, parseInt(params.matchId, 10))
+export const deleteStanding = withTxn(
+  async (
+    tx,
+    params: {
+      leagueId: string
+      matchId: string
+      user: AuthStatusResult
+    }
+  ) => {
+    if (!params.user.loggedIn || !params.user.roles.includes("admin")) {
+      permissionDenied()
+    }
+
+    const updateRes = await tx
+      .update(standingsTable)
+      .set({
+        deleted_at: new Date(),
+      })
+      .where(
+        and(
+          eq(standingsTable.league_id, params.leagueId),
+          eq(standingsTable.id, parseInt(params.matchId, 10))
+        )
       )
-    )
-  if ((updateRes.rowCount ?? 0) > 0) {
-    return
+    if ((updateRes.rowCount ?? 0) > 0) {
+      return
+    }
+    throw new HttpStatusError(400, "Could not delete standing")
   }
-  throw new HttpStatusError(400, "Could not delete standing")
-}
+)
 
 function toStandingsItem(
   obj: InferSelectModel<typeof standingsTable>
