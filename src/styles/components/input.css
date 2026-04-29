@@ -1,6 +1,6 @@
 @layer components {
   .ui-input {
-    @apply text-lg border-1 px-2 border-gray-700 placeholder-gray-600;
+    @apply text-lg border px-2 border-gray-700 placeholder-gray-600;
   }
 
   .ui-input:focus {
