@@ -1,0 +1,13 @@
+[tasks.container]
+description = "Build podman container"
+run = "podman build --tag c.nptr.dev/scoreboard:latest ."
+
+[tasks.podman-run]
+description = "Run app in prod"
+run = """\
+  podman run -d --replace \
+  --name scoreboard \
+  --env-file "$PWD/.env.prod" \
+  -p 3092:3000/tcp \
+  c.nptr.dev/scoreboard:latest
+  """
