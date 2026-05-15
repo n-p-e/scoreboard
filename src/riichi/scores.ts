@@ -3,6 +3,7 @@ import type {
   PartialPlayerRawScore,
 } from "~/riichi/riichi-schema"
 import { sum } from "~/utils/arrays"
+import compare from "~/utils/compare"
 
 export const defaultUma = [300, 100, -100, -300]
 export const defaultInitialPoints = 250
@@ -14,12 +15,12 @@ export function calculateMatchStandings(
 ): PartialFinalScore[] {
   const byRank = scores
     .map((v, index) => ({ ...v, index }))
-    .sort((a, b) => {
-      // null at the end
-      const cmp0 = compareDescOrder(a.points, b.points)
-      if (cmp0 !== 0) return cmp0
-      return compareAscOrder(a.index, b.index)
-    })
+    .sort(
+      compare.compose(
+        compare.byKey((v) => v.points, compare.desc),
+        compare.byKey((v) => v.index, compare.asc)
+      )
+    )
     .map((v, rank) => ({
       ...v,
       rank,
@@ -65,26 +66,14 @@ export function sortStandings<
 >(standings: T[]): T[] {
   return standings
     .slice()
-    .sort((a, b) => {
-      const cmp0 = compareDescOrder(a.points, b.points)
-      if (cmp0 !== 0) return cmp0
-      return compareAscOrder(a.rank, b.rank)
-    })
+    .sort(
+      compare.compose(
+        compare.byKey((v) => v.points, compare.desc),
+        compare.byKey((v) => v.rank, compare.asc)
+      )
+    )
     .map((item, rank) => ({
       ...item,
       rank,
     }))
-}
-
-function compareAscOrder(a: number | null, b: number | null) {
-  if (a == null && b == null) return 0
-  if (a == null) return 1
-  if (b == null) return -1
-  return a - b
-}
-function compareDescOrder(a: number | null, b: number | null) {
-  if (a == null && b == null) return 0
-  if (a == null) return 1
-  if (b == null) return -1
-  return b - a
 }
