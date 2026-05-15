@@ -91,9 +91,25 @@ describe("scores", () => {
 
     test("when all initial", () => {
       const result = calculateMatchStandings(scoresInput([250, 250, 250, 250]))
-      expect(result.map((r) => r.umaPoints)).toStrictEqual([
-        300, 100, -100, -300,
-      ])
+      expect(result.map((r) => r.umaPoints)).toStrictEqual([0, 0, 0, 0])
+    })
+
+    test("when tied", () => {
+      const result = calculateMatchStandings(scoresInput([300, 250, 250, 200]))
+      expect(result.map((r) => r.umaPoints)).toStrictEqual([300, 0, 0, -300])
+    })
+
+    test("when tied, keeps order", () => {
+      const result = calculateMatchStandings(scoresInput([300, 200, 250, 250]))
+      expect(result.map((r) => r.umaPoints)).toStrictEqual([300, -300, 0, 0])
+    })
+
+    test("when some are null", () => {
+      const result = calculateMatchStandings(
+        scoresInput([300, null, 200, null])
+      )
+      expect(result.map((r) => r.umaPoints)).toStrictEqual([300, 0, 100, 0])
+      expect(result.map((r) => r.finalScore)).toStrictEqual([350, 0, 50, 0])
     })
   })
 
