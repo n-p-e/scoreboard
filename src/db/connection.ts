@@ -1,9 +1,10 @@
 import "~/server/server-only"
-
 import { ExtractTablesWithRelations } from "drizzle-orm"
 import { drizzle, NodePgQueryResultHKT } from "drizzle-orm/node-postgres"
 import { PgTransaction } from "drizzle-orm/pg-core"
+
 import { serverEnv } from "~/env.server"
+
 import * as schema from "./schema"
 
 export const db = drizzle({

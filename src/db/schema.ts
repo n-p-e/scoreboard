@@ -1,5 +1,4 @@
 import "~/server/server-only"
-
 import { sql } from "drizzle-orm"
 import {
   type AnyPgColumn,
@@ -15,6 +14,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 import { uuidv7 } from "uuidv7"
+
 import type { PartialFinalScore } from "~/riichi/riichi-schema"
 
 function createdUpdatedAtCols() {

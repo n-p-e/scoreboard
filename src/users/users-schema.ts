@@ -1,4 +1,5 @@
 import * as z from "zod/mini"
+
 import { uuidString } from "~/utils/schema-util"
 
 export const UserZ = z.object({

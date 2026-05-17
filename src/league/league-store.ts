@@ -1,5 +1,4 @@
 import "~/server/server-only"
-
 import {
   and,
   desc,
@@ -10,6 +9,7 @@ import {
   lt,
   sql,
 } from "drizzle-orm"
+
 import { db } from "~/db/connection"
 import { leaguesTable, standingsTable } from "~/db/schema"
 import { HttpStatusError } from "~/error/http-error"

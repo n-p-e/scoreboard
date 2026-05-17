@@ -1,8 +1,10 @@
 import { getRequestIP } from "@tanstack/solid-start/server"
 import { Hono } from "hono"
+
 import { leaguesHandler } from "~/league/leagues-handler"
 import { riichiHandler } from "~/riichi/riichi-handler"
 import { usersHandler } from "~/users/users-handler"
+
 import { authMiddleware } from "./auth-middleware"
 import { backendErrorHandler, notFoundHandler } from "./error-handler"
 import { HonoEnv } from "./server-types"

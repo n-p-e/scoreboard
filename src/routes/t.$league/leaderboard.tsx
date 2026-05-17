@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { For, Suspense } from "solid-js"
 import * as z from "zod/mini"
+
 import { Loading } from "~/components/loading"
 import { queryLeaderboard } from "~/riichi/riichi-store"
 

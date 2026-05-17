@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { fragment, url } from "./url"
 
 describe("url template function", () => {

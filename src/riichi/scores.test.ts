@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest"
+
 import type { PartialPlayerRawScore } from "./riichi-schema"
 import { calculateMatchStandings, sortStandings } from "./scores"
 

@@ -1,5 +1,6 @@
 import { Hono } from "hono"
 import * as z from "zod/mini"
+
 import { apiContract } from "~/api-contract/contract"
 import {
   listLeagues,
@@ -13,6 +14,7 @@ import {
   paramValidator,
   queryValidator,
 } from "~/server/validator"
+
 import { PatchLeagueRequestZ } from "./league-schema"
 
 const contractDef = apiContract.definitions.leagues.definitions

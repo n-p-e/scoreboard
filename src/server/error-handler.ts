@@ -1,6 +1,7 @@
 import { ErrorHandler, NotFoundHandler } from "hono"
 import { ContentfulStatusCode } from "hono/utils/http-status"
 import * as zod from "zod"
+
 import { AppError } from "~/error/app-error"
 import { HttpStatusError } from "~/error/http-error"
 import { getLogger } from "~/logger"

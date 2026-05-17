@@ -1,6 +1,6 @@
 import "~/server/server-only"
-
 import { getRequest } from "@tanstack/solid-start/server"
+
 import { backendApp } from "~/server/backend"
 
 // Intercept the fetch request and route to backend app.

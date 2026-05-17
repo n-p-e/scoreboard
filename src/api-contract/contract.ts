@@ -1,5 +1,6 @@
 import { createContract, endpoint } from "@nptr/contract-dsl"
 import * as z from "zod/mini"
+
 import {
   LeagueDataZ,
   LeagueStatsZ,

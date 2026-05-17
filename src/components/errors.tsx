@@ -1,6 +1,7 @@
 import type { ErrorComponentProps } from "@tanstack/solid-router"
 import { Link, rootRouteId, useMatch, useRouter } from "@tanstack/solid-router"
 import { createSignal } from "solid-js"
+
 import { Button } from "~/components/button"
 import { appEnv } from "~/env"
 import { formatError } from "~/error/error-fmt"

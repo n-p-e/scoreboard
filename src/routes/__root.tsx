@@ -10,6 +10,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/solid-router-devtools"
 import * as Solid from "solid-js"
 import { HydrationScript } from "solid-js/web"
+
 import { DefaultCatchBoundary } from "~/components/errors"
 import { Loading } from "~/components/loading"
 import { NotFound } from "~/components/NotFound"

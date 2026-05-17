@@ -2,9 +2,11 @@ import { Popover } from "@ark-ui/solid/popover"
 import { useNavigate } from "@tanstack/solid-router"
 import { RiSystemMenuLine } from "solid-icons/ri"
 import { ComponentProps, JSXElement, ParentProps, Show } from "solid-js"
+
 import { appApiClient } from "~/api-contract/client"
 import { Link } from "~/components/Link"
 import { queryLoginState } from "~/users/login-state"
+
 import style from "./navbar.module.css"
 
 export const NavbarContainer = (
@@ -51,7 +53,8 @@ export const Dropdown = (props: ParentProps) => {
         <Popover.Content class={style.dropdownContent}>
           <Show when={loginState()?.loggedIn}>
             <div class={style.dropdownLabel}>
-              Logged in as {(() => {
+              Logged in as{" "}
+              {(() => {
                 const login = loginState()
                 if (login?.loggedIn) {
                   return login.user.username

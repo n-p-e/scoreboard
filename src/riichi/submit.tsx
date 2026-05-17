@@ -13,6 +13,7 @@ import {
   Switch,
   untrack,
 } from "solid-js"
+
 import { appApiClient } from "~/api-contract/client"
 import { Button } from "~/components/button"
 import type { LeagueData } from "~/league/league-schema"
@@ -20,6 +21,7 @@ import { calculateMatchStandings } from "~/riichi/scores"
 import { createAsyncAction } from "~/ui-utils/action"
 import { createDebouncedGetter } from "~/ui-utils/debounce"
 import { arraySet, sum } from "~/utils/arrays"
+
 import type {
   PartialPlayerRawScore,
   SubmitMatchResultRequest,

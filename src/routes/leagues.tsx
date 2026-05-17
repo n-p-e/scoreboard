@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, useRouter } from "@tanstack/solid-router"
 import { For } from "solid-js"
+
 import { appApiClient } from "~/api-contract/client"
 import { Button } from "~/components/button"
 import { Link } from "~/components/Link"

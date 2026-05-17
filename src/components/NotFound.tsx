@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 import { ParentProps } from "solid-js"
+
 import { Button } from "~/components/button"
 
 export function NotFound(props: ParentProps) {
