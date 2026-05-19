@@ -11,3 +11,11 @@ run = """\
   -p 3092:3000/tcp \
   c.nptr.dev/scoreboard:latest
   """
+
+[tasks.dev]
+dir = "packages/app"
+run = "bun x --bun vite dev"
+
+[tasks.build]
+dir = "packages/app"
+run = "bun x --bun vite build"
