@@ -6,8 +6,10 @@ WORKDIR /work
 COPY package.json bun.lock ./
 COPY pkg/contract-dsl/package.json ./pkg/contract-dsl/package.json
 COPY pkg/app/package.json ./pkg/app/package.json
+
+# skip installing vite (peer dependency of tanstack start) in prod
 RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile --prod
+    bun install --frozen-lockfile --prod --omit=peer
 
 FROM install-prod AS install-full
 RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache \
