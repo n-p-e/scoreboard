@@ -1,3 +1,2 @@
 [test]
-# exclude e2e
 root = "src"

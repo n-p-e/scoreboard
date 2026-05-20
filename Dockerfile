@@ -9,7 +9,7 @@ COPY pkg/app/package.json ./pkg/app/package.json
 
 # skip installing vite (peer dependency of tanstack start) in prod
 RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile --prod --omit=peer
+    bun install --frozen-lockfile --prod --omit=peer --filter=./pkg/app
 
 FROM install-prod AS install-full
 RUN --mount=type=cache,id=bun,target=/root/.bun/install/cache \
@@ -26,7 +26,8 @@ RUN cd pkg/app && bun run build
 # copy production dependencies and source code into final image
 FROM base AS release
 WORKDIR /work/pkg/app
-COPY --from=install-prod /work/node_modules node_modules
+COPY --from=install-prod /work/node_modules /work/node_modules
+COPY --from=install-prod /work/pkg/app/node_modules node_modules
 COPY --from=builder /work/pkg/app/src src
 COPY --from=builder /work/pkg/app/public public
 COPY --from=builder /work/pkg/app/.output .output
