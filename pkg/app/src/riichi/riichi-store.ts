@@ -243,22 +243,22 @@ export async function queryLeaderboard(params: {
       })
     }
 
+    const t = standingsItemsView
     const res = await db
       .select({
-        playerName: sql`min(${standingsItemsView.player_name})`.mapWith(String),
-        playerNameLower: standingsItemsView.player_name_lower,
-        standing: sum(standingsItemsView.final_score),
-        averagePoints: avg(standingsItemsView.points),
-        averageRank: avg(standingsItemsView.rank),
-        numGames: count(standingsItemsView.final_score),
+        playerName: sql`min(${t.player_name})`.mapWith(String),
+        playerNameLower: t.player_name_lower,
+        standing: sum(t.final_score),
+        averagePoints: avg(t.points),
+        averageRank: avg(t.rank),
+        numGames: count(t.final_score),
+        // hack: hard code calculation logic here, need to properly migrate
+        numPenalties: sql`sum(case when ${t.points} + ${t.uma_points} - 250 <> ${t.final_score} then 1 else 0 end)`,
       })
-      .from(standingsItemsView)
-      .where(eq(standingsItemsView.league_id, params.leagueId))
-      .groupBy(standingsItemsView.player_name_lower)
-      .orderBy(
-        desc(sum(standingsItemsView.final_score)),
-        asc(standingsItemsView.player_name_lower)
-      )
+      .from(t)
+      .where(eq(t.league_id, params.leagueId))
+      .groupBy(t.player_name_lower)
+      .orderBy(desc(sum(t.final_score)), asc(t.player_name_lower))
       .limit(params.limit ?? 25)
     return {
       leagueId: params.leagueId,
@@ -269,6 +269,7 @@ export async function queryLeaderboard(params: {
         averagePoints: Number(o.averagePoints),
         averageRank: Number(o.averageRank),
         numGames: Number(o.numGames),
+        numPenalties: Number(o.numPenalties),
       })),
     }
   })

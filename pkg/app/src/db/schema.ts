@@ -61,6 +61,7 @@ export const standingsItemsView = pgView("standings_items", {
   player_name: varchar().notNull(),
   player_name_lower: varchar().notNull(),
   points: integer().notNull(),
+  uma_points: integer().notNull(),
   final_score: integer().notNull(),
   rank: integer().notNull(),
 }).as(sql`
@@ -71,6 +72,7 @@ export const standingsItemsView = pgView("standings_items", {
       player_data->>'name' as player_name,
       coalesce(player_data->>'nameLower', lower(player_data->>'name')) as player_name_lower,
       (player_data->>'points')::int as points,
+      (player_data->>'umaPoints')::int as uma_points,
       (player_data->>'finalScore')::int as final_score,
       (player_data->>'rank')::int as rank
     from ${standingsTable}

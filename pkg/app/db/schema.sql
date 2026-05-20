@@ -27,7 +27,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner:
 --
 
 COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
@@ -159,6 +159,7 @@ CREATE VIEW public.standings_items AS
     (player_data.value ->> 'name'::text) AS player_name,
     COALESCE((player_data.value ->> 'nameLower'::text), lower((player_data.value ->> 'name'::text))) AS player_name_lower,
     ((player_data.value ->> 'points'::text))::integer AS points,
+    ((player_data.value ->> 'umaPoints'::text))::integer AS uma_points,
     ((player_data.value ->> 'finalScore'::text))::integer AS final_score,
     ((player_data.value ->> 'rank'::text))::integer AS rank
    FROM (public.standings
@@ -320,4 +321,3 @@ ALTER TABLE ONLY public.standings
 --
 
 \unrestrict nhEHObchZv7qh9xSad0a6iuNh2r9We7oaIczhXaw9gBsKpxG8gzWZAUkqiqQEBB
-
