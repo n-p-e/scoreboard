@@ -52,7 +52,9 @@ export function calculateMatchStandings(
   })
 
   // preserve original index
-  const originalOrder = splitUma.sort(compare.byKey(v => v.index, compare.asc))
+  const originalOrder = splitUma.sort(
+    compare.byKey((v) => v.index, compare.asc)
+  )
   return originalOrder
 }
 
