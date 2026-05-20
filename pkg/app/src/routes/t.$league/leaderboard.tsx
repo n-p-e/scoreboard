@@ -81,6 +81,9 @@ function Leaderboard() {
                 </td>
                 <td class="text-center border-x border-gray-700">
                   {item.numGames}
+                  <span class="text-gray-400">
+                    {item.numPenalties ? ` (${item.numPenalties})` : null}
+                  </span>
                 </td>
               </tr>
             )}

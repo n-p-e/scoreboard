@@ -48,6 +48,7 @@ export const LeaderboardItemZ = z.object({
   averagePoints: z.number(),
   averageRank: z.number(),
   numGames: z.number(),
+  numPenalties: z.nullish(z.number()),
 })
 export type LeaderboardItem = z.infer<typeof LeaderboardItemZ>
 
