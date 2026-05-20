@@ -25,6 +25,8 @@ import { StandingsItemZ, SubmitMatchResultRequestZ } from "./riichi-schema"
 const listMatchesQuerySchema = z.object({
   matchId: z.optional(z.string()),
   limit: z.optional(integerRange(1, 1000)),
+  before: z.optional(z.string()),
+  after: z.optional(z.string()),
 })
 
 const updateMatchBodySchema = z.object({
@@ -54,13 +56,14 @@ export const riichiHandler = new Hono<HonoEnv>()
     queryValidator(listMatchesQuerySchema),
     async (c) => {
       const query = c.req.valid("query")
-      return c.json({
-        data: await listMatches({
-          leagueId: c.req.param("league"),
-          matchId: query.matchId,
-          limit: query.limit,
-        }),
+      const data = await listMatches({
+        leagueId: c.req.param("league"),
+        matchId: query.matchId,
+        limit: query.limit,
+        before: query.before,
+        after: query.after,
       })
+      return c.json(data)
     }
   )
   .put(

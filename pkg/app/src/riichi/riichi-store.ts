@@ -10,6 +10,7 @@ import {
   gt,
   type InferSelectModel,
   isNull,
+  lt,
   sql,
   sum,
 } from "drizzle-orm"
@@ -107,6 +108,8 @@ export async function listMatches(params: {
   leagueId: string
   matchId?: string
   limit?: number
+  before?: string
+  after?: string
 }) {
   logger.info({ params }, "listMatches")
 
@@ -125,11 +128,26 @@ export async function listMatches(params: {
     query = query.where(eq(standingsTable.id, parseInt(params.matchId, 10)))
   }
 
-  const res = await query
-    .orderBy(desc(standingsTable.created_at))
-    .limit(params.limit ?? 50)
+  if (params.before && !Number.isNaN(Number(params.before))) {
+    query = query.where(gt(standingsTable.id, Number(params.before)))
+  }
+  if (params.after && !Number.isNaN(Number(params.after))) {
+    query = query.where(lt(standingsTable.id, Number(params.after)))
+  }
 
-  return res.map(toStandingsItem)
+  const limit = params.limit ?? 50
+  const res = await query
+    .orderBy(desc(standingsTable.id), desc(standingsTable.created_at))
+    .limit(limit + 1)
+  const data = res.map(toStandingsItem)
+  let prevPage: string | null = null
+  let nextPage: string | null = null
+  if (res.length > 1) {
+    prevPage = data[0].matchId
+    nextPage = data[data.length - 2].matchId
+  }
+  const hasMore = data.length === limit + 1
+  return { data: data.slice(0, limit), prev: prevPage, next: nextPage, hasMore }
 }
 
 export async function updateMatch(
