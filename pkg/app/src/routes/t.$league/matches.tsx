@@ -118,6 +118,20 @@ function MatchesPageContent() {
                         </div>
                         <div class="font-mono text-sm">
                           {(player.finalScore / 10).toFixed(1)}
+                          <Show
+                            when={
+                              player.points! + player.umaPoints - 250 !==
+                              player.finalScore
+                            }
+                          >
+                            <span class="ps-1 text-xs text-red-400">
+                              (
+                              {(player.finalScore -
+                                (player.points! + player.umaPoints - 250)) /
+                                10}
+                              )
+                            </span>
+                          </Show>
                         </div>
                       </div>
                     </div>
