@@ -27,21 +27,44 @@ import { timezonePref } from "~/ui-utils/timezone-preference"
 import { queryLoginState } from "~/users/login-state.js"
 
 const loader = createServerFn()
-  .inputValidator(z.object({ leagueId: z.string() }))
+  .inputValidator(
+    z.object({
+      leagueId: z.string(),
+      before: z.optional(z.string()),
+      after: z.optional(z.string()),
+    })
+  )
   .handler(async ({ data }) => {
     // await new Promise((resolve) => setTimeout(resolve, 500))
-    const leagueId = data.leagueId
+    const { leagueId, before, after } = data
     const league = await findLeague(leagueId)
     if (league == null) throw notFound()
-    const matches = await listMatches({ leagueId: league.leagueId })
-    return { league, matches }
+    const {
+      data: matches,
+      prev,
+      next,
+      hasMore,
+    } = await listMatches({ leagueId: league.leagueId, before, after })
+    return { league, matches, prev, next, hasMore }
   })
 
 export const Route = createFileRoute("/t/$league/matches")({
+  validateSearch: z.object({
+    before: z.optional(z.string()),
+    after: z.optional(z.string()),
+  }),
+  loaderDeps: ({ search }) => search,
   head: () => ({
     meta: [{ title: "Recent Matches – Riichi Scoreboard" }],
   }),
-  loader: async (ctx) => loader({ data: { leagueId: ctx.params.league } }),
+  loader: async (ctx) =>
+    loader({
+      data: {
+        leagueId: ctx.params.league,
+        before: ctx.deps.before,
+        after: ctx.deps.after,
+      },
+    }),
   component: MatchesPage,
   pendingComponent: Loading,
   preload: false,
@@ -67,6 +90,7 @@ function MatchesPageContent() {
         Recent Matches:{" "}
         <span class="font-normal">{data().league.displayName ?? ""}</span>
       </h1>
+      <Pagination />
       <ul class="flex flex-col p-4 gap-4" data-testid="matches-list">
         <For each={data().matches}>
           {(item) => (
@@ -169,8 +193,50 @@ function MatchesPageContent() {
             </li>
           )}
         </For>
+
+       <Pagination />
       </ul>
     </main>
+  )
+}
+
+const Pagination = () => {
+  const data = Route.useLoaderData()
+
+  return (
+    <div class="flex space-x-2 w-full justify-center">
+      <Link
+        to="/t/$league/matches"
+        params={{ league: data().league.leagueId }}
+        search={{}}
+        resetScroll
+        reloadDocument
+      >
+        <Button>First</Button>
+      </Link>
+      <Show when={data().prev}>
+        <Link
+          to="/t/$league/matches"
+          params={{ league: data().league.leagueId }}
+          search={{ after: data().prev ?? undefined }}
+          resetScroll
+          reloadDocument
+        >
+          <Button>Previous</Button>
+        </Link>
+      </Show>
+      <Show when={data().hasMore}>
+        <Link
+          to="/t/$league/matches"
+          params={{ league: data().league.leagueId }}
+          search={{ after: data().next ?? undefined }}
+          resetScroll
+          reloadDocument
+        >
+          <Button>Next</Button>
+        </Link>
+      </Show>
+    </div>
   )
 }
 

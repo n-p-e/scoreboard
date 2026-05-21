@@ -128,11 +128,25 @@ export async function listMatches(params: {
     query = query.where(eq(standingsTable.id, parseInt(params.matchId, 10)))
   }
 
-  if (params.before && !Number.isNaN(Number(params.before))) {
-    query = query.where(gt(standingsTable.id, Number(params.before)))
+  const tokenPrefix = "m_"
+  const parsePaginationToken = (token: string | null | undefined) => {
+    if (token == null) {
+      return null
+    }
+    const res = Number(token.slice(tokenPrefix.length))
+    if (!isNaN(res)) {
+      return res
+    }
   }
-  if (params.after && !Number.isNaN(Number(params.after))) {
-    query = query.where(lt(standingsTable.id, Number(params.after)))
+
+  const before = parsePaginationToken(params.before)
+  const after = parsePaginationToken(params.after)
+
+  if (before) {
+    query = query.where(gt(standingsTable.id, before))
+  }
+  if (after) {
+    query = query.where(lt(standingsTable.id, after))
   }
 
   const limit = params.limit ?? 50
@@ -143,8 +157,8 @@ export async function listMatches(params: {
   let prevPage: string | null = null
   let nextPage: string | null = null
   if (res.length > 1) {
-    prevPage = data[0].matchId
-    nextPage = data[data.length - 2].matchId
+    prevPage = "m_" + data[0].matchId
+    nextPage = "m_" + data[data.length - 2].matchId
   }
   const hasMore = data.length === limit + 1
   return { data: data.slice(0, limit), prev: prevPage, next: nextPage, hasMore }
@@ -190,7 +204,7 @@ export async function updateMatch(
         matchId: params.matchId,
         limit: 1,
       })
-    )[0]
+    ).data[0]
   })
 }
 
