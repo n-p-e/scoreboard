@@ -19,7 +19,7 @@ import * as z from "zod/mini"
 
 import { appApiClient } from "~/api-contract/client.js"
 import { Button } from "~/components/button.js"
-import { Link } from "~/components/Link.js"
+import { Link, LinkButton } from "~/components/Link.js"
 import { Loading } from "~/components/loading"
 import { findLeague } from "~/league/league-store"
 import { listMatches } from "~/riichi/riichi-store"
@@ -194,7 +194,7 @@ function MatchesPageContent() {
           )}
         </For>
 
-       <Pagination />
+        <Pagination />
       </ul>
     </main>
   )
@@ -202,6 +202,7 @@ function MatchesPageContent() {
 
 const Pagination = () => {
   const data = Route.useLoaderData()
+  const search = Route.useSearch()
 
   return (
     <div class="flex space-x-2 w-full justify-center">
@@ -214,28 +215,30 @@ const Pagination = () => {
       >
         <Button>First</Button>
       </Link>
-      <Show when={data().prev}>
-        <Link
-          to="/t/$league/matches"
-          params={{ league: data().league.leagueId }}
-          search={{ after: data().prev ?? undefined }}
-          resetScroll
-          reloadDocument
-        >
-          <Button>Previous</Button>
-        </Link>
-      </Show>
-      <Show when={data().hasMore}>
-        <Link
-          to="/t/$league/matches"
-          params={{ league: data().league.leagueId }}
-          search={{ after: data().next ?? undefined }}
-          resetScroll
-          reloadDocument
-        >
-          <Button>Next</Button>
-        </Link>
-      </Show>
+
+      <LinkButton
+        to="/t/$league/matches"
+        params={{ league: data().league.leagueId }}
+        search={{ before: data().prev ?? undefined }}
+        disabled={
+          (search().before && !data().hasMore) ||
+          (!search().before && !search().after)
+        }
+        resetScroll
+        reloadDocument
+      >
+        Previous
+      </LinkButton>
+
+      <LinkButton
+        to="/t/$league/matches"
+        params={{ league: data().league.leagueId }}
+        search={{ after: data().next ?? undefined }}
+        disabled={!search().before && !data().hasMore}
+        resetScroll
+      >
+        Next
+      </LinkButton>
     </div>
   )
 }

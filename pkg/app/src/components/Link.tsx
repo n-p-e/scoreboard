@@ -1,6 +1,8 @@
 import { createLink, LinkComponent } from "@tanstack/solid-router"
 import * as Solid from "solid-js"
 
+import { Button } from "./button"
+
 type CustomLinkProps = Solid.JSX.IntrinsicElements["a"] & {
   activeClass?: string
   inactiveClass?: string
@@ -35,3 +37,5 @@ export const Link: LinkComponent<Solid.Component<CustomLinkProps>> = (
     />
   )
 }
+
+export const LinkButton = createLink(Button)

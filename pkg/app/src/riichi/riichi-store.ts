@@ -142,25 +142,36 @@ export async function listMatches(params: {
   const before = parsePaginationToken(params.before)
   const after = parsePaginationToken(params.after)
 
-  if (before) {
-    query = query.where(gt(standingsTable.id, before))
-  }
-  if (after) {
-    query = query.where(lt(standingsTable.id, after))
-  }
-
+  console.log({ before, after })
   const limit = params.limit ?? 50
-  const res = await query
-    .orderBy(desc(standingsTable.id), desc(standingsTable.created_at))
-    .limit(limit + 1)
-  const data = res.map(toStandingsItem)
+
+  const queryResult = await (async () => {
+    if (before) {
+      const res = await query
+        .where(gt(standingsTable.id, before))
+        .orderBy(asc(standingsTable.id), asc(standingsTable.created_at))
+        .limit(limit)
+      res.reverse()
+      return res
+    }
+    if (after) {
+      query = query.where(lt(standingsTable.id, after))
+    }
+    return await query
+      .orderBy(desc(standingsTable.id), desc(standingsTable.created_at))
+      .limit(limit)
+  })()
+  const data = queryResult.map(toStandingsItem)
+
   let prevPage: string | null = null
   let nextPage: string | null = null
-  if (res.length > 1) {
+  if (data.length > 1) {
     prevPage = "m_" + data[0].matchId
     nextPage = "m_" + data[data.length - 2].matchId
   }
-  const hasMore = data.length === limit + 1
+
+  console.log({ prevPage, nextPage })
+  const hasMore = data.length === limit
   return { data: data.slice(0, limit), prev: prevPage, next: nextPage, hasMore }
 }
 
