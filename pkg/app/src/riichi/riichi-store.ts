@@ -113,16 +113,12 @@ export async function listMatches(params: {
 }) {
   logger.info({ params }, "listMatches")
 
-  let query = db
-    .select()
-    .from(standingsTable)
-    .$dynamic()
-    .where(
-      and(
-        isNull(standingsTable.deleted_at),
-        eq(standingsTable.league_id, params.leagueId)
-      )
-    )
+  let query = db.select().from(standingsTable).$dynamic()
+
+  const conditions = [
+    eq(standingsTable.league_id, params.leagueId),
+    isNull(standingsTable.deleted_at),
+  ]
 
   if (params.matchId) {
     query = query.where(eq(standingsTable.id, parseInt(params.matchId, 10)))
@@ -142,20 +138,19 @@ export async function listMatches(params: {
   const before = parsePaginationToken(params.before)
   const after = parsePaginationToken(params.after)
 
-  console.log({ before, after })
   const limit = params.limit ?? 50
 
   const queryResult = await (async () => {
     if (before) {
       const res = await query
-        .where(gt(standingsTable.id, before))
+        .where(and(...conditions, gt(standingsTable.id, before)))
         .orderBy(asc(standingsTable.id), asc(standingsTable.created_at))
         .limit(limit)
       res.reverse()
       return res
     }
     if (after) {
-      query = query.where(lt(standingsTable.id, after))
+      query = query.where(and(...conditions, lt(standingsTable.id, after)))
     }
     return await query
       .orderBy(desc(standingsTable.id), desc(standingsTable.created_at))
