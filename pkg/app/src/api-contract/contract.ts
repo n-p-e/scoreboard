@@ -66,11 +66,18 @@ export const riichiContract = createContract({ prefix: "" }).routes({
     queryParams: z.object({
       matchId: z.optional(z.string()),
       limit: z.optional(integerRange(1, 1000)),
+      before: z.optional(z.string()),
+      after: z.optional(z.string()),
     }),
     pathParams: z.object({
       league: z.string(),
     }),
-    resBody: z.object({ data: z.array(StandingsItemZ) }),
+    resBody: z.object({
+      data: z.array(StandingsItemZ),
+      prev: z.nullable(z.string()),
+      next: z.nullable(z.string()),
+      hasMore: z.boolean(),
+    }),
   }),
 
   updateMatch: endpoint.put("/leagues/:league/match/:match", {

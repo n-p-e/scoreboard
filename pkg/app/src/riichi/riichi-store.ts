@@ -32,8 +32,13 @@ import type {
 import { calculateMatchStandings, sortStandings } from "~/riichi/scores"
 import { checkAdminRole, checkAuth } from "~/users/auth"
 import type { AuthStatus } from "~/users/users-schema"
+import * as pager from "~/utils/pagination-token"
 
 const logger = getLogger("riichi-store")
+
+export const matchesPager = pager.define({
+  matchId: pager.string("m"),
+})
 
 export async function submitRiichi(params: SubmitMatchResultRequest["data"]) {
   logger.info({ params }, "submitRiichi")
@@ -121,53 +126,90 @@ export async function listMatches(params: {
   ]
 
   if (params.matchId) {
-    query = query.where(eq(standingsTable.id, parseInt(params.matchId, 10)))
+    conditions.push(eq(standingsTable.id, parseInt(params.matchId, 10)))
   }
 
-  const tokenPrefix = "m_"
-  const parsePaginationToken = (token: string | null | undefined) => {
-    if (token == null) {
-      return null
-    }
-    const res = Number(token.slice(tokenPrefix.length))
-    if (!isNaN(res)) {
-      return res
-    }
-  }
-
-  const before = parsePaginationToken(params.before)
-  const after = parsePaginationToken(params.after)
+  const beforeData = params.before
+    ? pager.decode(matchesPager, params.before)
+    : null
+  const afterData = params.after
+    ? pager.decode(matchesPager, params.after)
+    : null
+  const before = beforeData ? parseInt(beforeData.matchId, 10) : null
+  const after = afterData ? parseInt(afterData.matchId, 10) : null
 
   const limit = params.limit ?? 50
 
   const queryResult = await (async () => {
-    if (before) {
+    if (before != null) {
       const res = await query
         .where(and(...conditions, gt(standingsTable.id, before)))
         .orderBy(asc(standingsTable.id), asc(standingsTable.created_at))
-        .limit(limit)
+        .limit(limit + 1)
+      const more = res.length > limit
+      if (more) res.pop()
       res.reverse()
-      return res
+      return { rows: res, hasMore: more, dir: "before" as const }
     }
-    if (after) {
+    if (after != null) {
       query = query.where(and(...conditions, lt(standingsTable.id, after)))
+    } else {
+      query = query.where(and(...conditions))
     }
-    return await query
+    const res = await query
       .orderBy(desc(standingsTable.id), desc(standingsTable.created_at))
-      .limit(limit)
+      .limit(limit + 1)
+    const more = res.length > limit
+    if (more) res.pop()
+    const dir = after != null ? ("after" as const) : ("default" as const)
+    return {
+      rows: res,
+      hasMore: more,
+      dir,
+    }
   })()
-  const data = queryResult.map(toStandingsItem)
+  const data = queryResult.rows.map(toStandingsItem)
 
   let prevPage: string | null = null
   let nextPage: string | null = null
-  if (data.length > 1) {
-    prevPage = "m_" + data[0].matchId
-    nextPage = "m_" + data[data.length - 2].matchId
+  if (data.length > 0) {
+    switch (queryResult.dir) {
+      case "before":
+        prevPage = queryResult.hasMore
+          ? pager.encode(matchesPager, {
+              matchId: String(data[0].matchId),
+            })
+          : null
+        nextPage = pager.encode(matchesPager, {
+          matchId: String(data[data.length - 1].matchId),
+        })
+        break
+      case "after":
+        prevPage = pager.encode(matchesPager, {
+          matchId: String(data[0].matchId),
+        })
+        nextPage = queryResult.hasMore
+          ? pager.encode(matchesPager, {
+              matchId: String(data[data.length - 1].matchId),
+            })
+          : null
+        break
+      default:
+        prevPage = null
+        nextPage = queryResult.hasMore
+          ? pager.encode(matchesPager, {
+              matchId: String(data[data.length - 1].matchId),
+            })
+          : null
+    }
   }
 
-  console.log({ prevPage, nextPage })
-  const hasMore = data.length === limit
-  return { data: data.slice(0, limit), prev: prevPage, next: nextPage, hasMore }
+  return {
+    data,
+    prev: prevPage,
+    next: nextPage,
+    hasMore: queryResult.hasMore,
+  }
 }
 
 export async function updateMatch(
