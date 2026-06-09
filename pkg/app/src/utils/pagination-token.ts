@@ -44,6 +44,12 @@ export function encode<D extends PagerDef>(
       type === "int"
         ? (data[key] as number).toFixed(0)
         : (data[key] as string)
+
+    if (value.includes(Separator)) {
+      throw new Error(
+        `pagination-token encode: value for "${key}" must not contain "${Separator}"`
+      )
+    }
     parts.push(marker + Separator + value)
   }
 

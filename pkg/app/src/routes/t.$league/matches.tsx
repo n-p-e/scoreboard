@@ -239,7 +239,6 @@ const Pagination = () => {
           (!search().before && !search().after)
         }
         resetScroll
-        reloadDocument
       >
         Previous
       </LinkButton>
