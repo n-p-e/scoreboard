@@ -171,6 +171,8 @@ export async function listMatches(params: {
       matchId: String(data[data.length - 1].matchId),
     })
     if (direction === "forward") {
+      // first page?
+      if (after == null) first = null
       if (!hasMore) last = null
     } else {
       if (!hasMore) first = null
