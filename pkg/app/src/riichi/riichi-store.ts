@@ -121,7 +121,7 @@ export async function listMatches(params: {
   ]
 
   if (params.matchId) {
-    query = query.where(eq(standingsTable.id, parseInt(params.matchId, 10)))
+    conditions.push(eq(standingsTable.id, parseInt(params.matchId, 10)))
   }
 
   const tokenPrefix = "m_"
@@ -150,9 +150,10 @@ export async function listMatches(params: {
       return res
     }
     if (after) {
-      query = query.where(and(...conditions, lt(standingsTable.id, after)))
+      conditions.push(lt(standingsTable.id, after))
     }
     return await query
+      .where(and(...conditions))
       .orderBy(desc(standingsTable.id), desc(standingsTable.created_at))
       .limit(limit)
   })()
