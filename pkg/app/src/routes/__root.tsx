@@ -1,13 +1,11 @@
 /// <reference types="vite/client" />
 import { QueryClient } from "@tanstack/solid-query"
-import { SolidQueryDevtools } from "@tanstack/solid-query-devtools"
 import {
   createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
 } from "@tanstack/solid-router"
-import { TanStackRouterDevtools } from "@tanstack/solid-router-devtools"
 import * as Solid from "solid-js"
 import { HydrationScript } from "solid-js/web"
 
@@ -16,6 +14,10 @@ import { Loading } from "~/components/loading"
 import { NotFound } from "~/components/NotFound"
 
 import appCss from "~/styles/app.css?url"
+
+const Devtools = import.meta.env.DEV
+  ? Solid.lazy(() => import("~/components/devtools"))
+  : () => null
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
@@ -79,8 +81,9 @@ function RootDocument({ children }: Readonly<{ children: Solid.JSX.Element }>) {
       <body>
         <HeadContent />
         {children}
-        <TanStackRouterDevtools position="bottom-right" />
-        <SolidQueryDevtools buttonPosition="bottom-left" />
+        <Solid.Suspense>
+          <Devtools />
+        </Solid.Suspense>
         <Scripts />
       </body>
     </html>

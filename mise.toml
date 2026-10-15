@@ -17,5 +17,5 @@ dir = "packages/app"
 run = "bun x --bun vite dev"
 
 [tasks.build]
-dir = "packages/app"
+dir = "pkg/app"
 run = "bun x --bun vite build"
