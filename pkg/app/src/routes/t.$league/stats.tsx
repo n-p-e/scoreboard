@@ -12,7 +12,7 @@ const summarySearchSchema = z.object({
 })
 
 const loader = createServerFn()
-  .inputValidator(
+  .validator(
     z.object({
       leagueId: z.string(),
       period: z.enum(["day", "week"]),

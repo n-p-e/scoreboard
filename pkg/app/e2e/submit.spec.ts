@@ -44,9 +44,8 @@ test("test", async ({ page }) => {
   await page.getByRole("button", { name: "Submit" }).click()
   await page.getByRole("button", { name: "Confirm" }).click()
 
-  await page.getByRole("link", { name: "Matches" }).click()
-
-  expect(
-    await page.getByTestId("matches-list").locator("li").first()
-  ).toContainText([/player4/])
+  await expect(page).toHaveURL("/t/test_league/matches")
+  await expect(
+    page.getByTestId("matches-list").locator("li").first()
+  ).toContainText("player4")
 })

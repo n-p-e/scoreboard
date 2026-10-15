@@ -9,21 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as LeaguesRouteImport } from './routes/leagues'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as UserChangePasswordRouteImport } from './routes/user/change-password'
-import { Route as TLeagueRouteImport } from './routes/t.$league'
+import { Route as LeaguesRouteImport } from './routes/leagues'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
-import { Route as TLeagueSubmitRouteImport } from './routes/t.$league/submit'
-import { Route as TLeagueStatsRouteImport } from './routes/t.$league/stats'
-import { Route as TLeagueMatchesRouteImport } from './routes/t.$league/matches'
+import { Route as TLeagueRouteImport } from './routes/t.$league'
+import { Route as UserChangePasswordRouteImport } from './routes/user/change-password'
 import { Route as TLeagueLeaderboardRouteImport } from './routes/t.$league/leaderboard'
+import { Route as TLeagueMatchesRouteImport } from './routes/t.$league/matches'
+import { Route as TLeagueStatsRouteImport } from './routes/t.$league/stats'
+import { Route as TLeagueSubmitRouteImport } from './routes/t.$league/submit'
 import { Route as TLeagueMatchMatchIdEditRouteImport } from './routes/t.$league/match.$matchId/edit'
 
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaguesRoute = LeaguesRouteImport.update({
@@ -31,19 +31,9 @@ const LeaguesRoute = LeaguesRouteImport.update({
   path: '/leagues',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UserChangePasswordRoute = UserChangePasswordRouteImport.update({
-  id: '/user/change-password',
-  path: '/user/change-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TLeagueRoute = TLeagueRouteImport.update({
-  id: '/t/$league',
-  path: '/t/$league',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSplatRoute = ApiSplatRouteImport.update({
@@ -51,14 +41,19 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TLeagueSubmitRoute = TLeagueSubmitRouteImport.update({
-  id: '/submit',
-  path: '/submit',
-  getParentRoute: () => TLeagueRoute,
+const TLeagueRoute = TLeagueRouteImport.update({
+  id: '/t/$league',
+  path: '/t/$league',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const TLeagueStatsRoute = TLeagueStatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
+const UserChangePasswordRoute = UserChangePasswordRouteImport.update({
+  id: '/user/change-password',
+  path: '/user/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TLeagueLeaderboardRoute = TLeagueLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => TLeagueRoute,
 } as any)
 const TLeagueMatchesRoute = TLeagueMatchesRouteImport.update({
@@ -66,9 +61,14 @@ const TLeagueMatchesRoute = TLeagueMatchesRouteImport.update({
   path: '/matches',
   getParentRoute: () => TLeagueRoute,
 } as any)
-const TLeagueLeaderboardRoute = TLeagueLeaderboardRouteImport.update({
-  id: '/leaderboard',
-  path: '/leaderboard',
+const TLeagueStatsRoute = TLeagueStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => TLeagueRoute,
+} as any)
+const TLeagueSubmitRoute = TLeagueSubmitRouteImport.update({
+  id: '/submit',
+  path: '/submit',
   getParentRoute: () => TLeagueRoute,
 } as any)
 const TLeagueMatchMatchIdEditRoute = TLeagueMatchMatchIdEditRouteImport.update({
@@ -170,11 +170,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/solid-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leagues': {
@@ -184,25 +184,11 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof LeaguesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/user/change-password': {
-      id: '/user/change-password'
-      path: '/user/change-password'
-      fullPath: '/user/change-password'
-      preLoaderRoute: typeof UserChangePasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/t/$league': {
-      id: '/t/$league'
-      path: '/t/$league'
-      fullPath: '/t/$league'
-      preLoaderRoute: typeof TLeagueRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/$': {
@@ -212,18 +198,25 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/t/$league/submit': {
-      id: '/t/$league/submit'
-      path: '/submit'
-      fullPath: '/t/$league/submit'
-      preLoaderRoute: typeof TLeagueSubmitRouteImport
-      parentRoute: typeof TLeagueRoute
+    '/t/$league': {
+      id: '/t/$league'
+      path: '/t/$league'
+      fullPath: '/t/$league'
+      preLoaderRoute: typeof TLeagueRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/t/$league/stats': {
-      id: '/t/$league/stats'
-      path: '/stats'
-      fullPath: '/t/$league/stats'
-      preLoaderRoute: typeof TLeagueStatsRouteImport
+    '/user/change-password': {
+      id: '/user/change-password'
+      path: '/user/change-password'
+      fullPath: '/user/change-password'
+      preLoaderRoute: typeof UserChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/t/$league/leaderboard': {
+      id: '/t/$league/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/t/$league/leaderboard'
+      preLoaderRoute: typeof TLeagueLeaderboardRouteImport
       parentRoute: typeof TLeagueRoute
     }
     '/t/$league/matches': {
@@ -233,11 +226,18 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof TLeagueMatchesRouteImport
       parentRoute: typeof TLeagueRoute
     }
-    '/t/$league/leaderboard': {
-      id: '/t/$league/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/t/$league/leaderboard'
-      preLoaderRoute: typeof TLeagueLeaderboardRouteImport
+    '/t/$league/stats': {
+      id: '/t/$league/stats'
+      path: '/stats'
+      fullPath: '/t/$league/stats'
+      preLoaderRoute: typeof TLeagueStatsRouteImport
+      parentRoute: typeof TLeagueRoute
+    }
+    '/t/$league/submit': {
+      id: '/t/$league/submit'
+      path: '/submit'
+      fullPath: '/t/$league/submit'
+      preLoaderRoute: typeof TLeagueSubmitRouteImport
       parentRoute: typeof TLeagueRoute
     }
     '/t/$league/match/$matchId/edit': {

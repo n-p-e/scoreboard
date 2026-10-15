@@ -27,7 +27,7 @@ import { timezonePref } from "~/ui-utils/timezone-preference"
 import { queryLoginState } from "~/users/login-state.js"
 
 const loader = createServerFn()
-  .inputValidator(
+  .validator(
     z.object({
       leagueId: z.string(),
       before: z.optional(z.string()),
