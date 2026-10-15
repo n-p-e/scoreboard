@@ -82,7 +82,7 @@ export const RiichiResultSubmission = (props: { league: LeagueData }) => {
           }
 
           return {
-            name: formData.get(`name_player_${player}`) as string,
+            name: (formData.get(`name_player_${player}`) as string).trim(),
             points: Number(formData.get(`score_player_${player}`)),
             adjustedFinalScore,
           }

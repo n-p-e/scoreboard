@@ -63,7 +63,13 @@ export const SubmitMatchResultRequestZ = z.object({
     leagueId: z.string().check(z.minLength(1)),
     matchResult: z.array(
       z.object({
-        name: z.string().check(z.minLength(1, "Player name is empty")),
+        name: z.string().check(
+          z.minLength(1, "Player name is empty"),
+          z.refine(
+            (name) => name === name.trim(),
+            "Player name must not have leading or trailing whitespace"
+          )
+        ),
         points: z.number(),
         adjustedFinalScore: z.optional(z.nullable(z.number())),
       })
