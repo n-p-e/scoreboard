@@ -277,9 +277,8 @@ const FallbackDateDisplay = (props: { date: Date }) => {
 
   return (
     <NoHydration>
-      {timezone
-        ? formatMatchDate(props.date, timezone)
-        : props.date.toISOString()}
+      {/* Wait for hydration when the browser has not sent a timezone yet. */}
+      {timezone ? formatMatchDate(props.date, timezone) : null}
     </NoHydration>
   )
 }
